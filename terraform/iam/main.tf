@@ -247,3 +247,92 @@ resource "aws_iam_group_policy_attachment" "readonly" {
   group      = aws_iam_group.readonly.name
   policy_arn = aws_iam_policy.readonly.arn
 }
+
+resource "aws_iam_user" "terraform" {
+  name = "imaginepatch-terraform"
+  tags = {
+    status = "active"
+    role   = "infrastructure-automation"
+  }
+}
+
+resource "aws_iam_user" "angie" {
+  name = "angie-imaginepatch"
+  tags = {
+    status = "active"
+    role   = "store-manager-designer"
+  }
+}
+
+resource "aws_iam_user" "dev_02" {
+  name = "dev-02"
+  tags = {
+    status = "placeholder"
+  }
+}
+
+resource "aws_iam_user" "store_manager_02" {
+  name = "store-manager-02"
+  tags = {
+    status = "placeholder"
+  }
+}
+
+resource "aws_iam_user" "designer_02" {
+  name = "designer-02"
+  tags = {
+    status = "placeholder"
+  }
+}
+
+resource "aws_iam_user" "finance_02" {
+  name = "finance-02"
+  tags = {
+    status = "placeholder"
+  }
+}
+
+resource "aws_iam_user" "auditor_02" {
+  name = "auditor-02"
+  tags = {
+    status = "placeholder"
+  }
+}
+
+resource "aws_iam_user_group_membership" "terraform" {
+  user   = aws_iam_user.terraform.name
+  groups = [aws_iam_group.developers.name]
+}
+
+resource "aws_iam_user_group_membership" "angie" {
+  user   = aws_iam_user.angie.name
+  groups = [
+    aws_iam_group.store_managers.name,
+    aws_iam_group.designers.name
+  ]
+}
+
+resource "aws_iam_user_group_membership" "dev_02" {
+  user   = aws_iam_user.dev_02.name
+  groups = [aws_iam_group.developers.name]
+}
+
+resource "aws_iam_user_group_membership" "store_manager_02" {
+  user   = aws_iam_user.store_manager_02.name
+  groups = [aws_iam_group.store_managers.name]
+}
+
+resource "aws_iam_user_group_membership" "designer_02" {
+  user   = aws_iam_user.designer_02.name
+  groups = [aws_iam_group.designers.name]
+}
+
+resource "aws_iam_user_group_membership" "finance_02" {
+  user   = aws_iam_user.finance_02.name
+  groups = [aws_iam_group.finance_owners.name]
+}
+
+resource "aws_iam_user_group_membership" "auditor_02" {
+  user   = aws_iam_user.auditor_02.name
+  groups = [aws_iam_group.readonly.name]
+}
