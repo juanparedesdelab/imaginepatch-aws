@@ -1,4 +1,5 @@
 from diagrams.custom import Custom
+from diagrams.saas.cdn import Cloudflare
 from diagrams import Diagram, Cluster, Edge
 from diagrams.aws.network import Route53, CloudFront
 from diagrams.aws.compute import Lightsail
@@ -50,8 +51,8 @@ with Diagram(
 
         # Edge layer
         with Cluster("Edge Layer"):
-            dns = Route53("Route 53\nimaginepatch.com")
-            cdn = CloudFront("CloudFront\nCDN + SSL")
+            dns = Route53("Route 53\nDomain registration")
+            cdn = Cloudflare("Cloudflare\nDNS + CDN + SSL")
 
         # Compute
         with Cluster("Compute"):
@@ -78,9 +79,8 @@ with Diagram(
         iam = IAM("IAM\n5 Groups")
 
     # Traffic flow
-    customer >> Edge(label="  HTTPS  ") >> dns
-    dns >> Edge(label="DNS") >> cdn
-    cdn >> Edge(label="Cache miss") >> lightsail
+    customer >> Edge(label="  HTTPS  ") >> cdn
+    cdn >> Edge(label="Origin") >> lightsail
 
     # Lightsail to data
     lightsail >> Edge(label="SQL") >> db
