@@ -190,6 +190,58 @@ without security benefit.
 changing payment methods or closing the account. Never used for
 day-to-day operations.
 
+---
+
+## ADR-008 — DNS: Cloudflare over Route 53 for DNS resolution
+
+**Date:** 2026-04-07
+**Status:** Accepted
+
+**Context:**
+After creating the Lightsail instance and configuring Route 53 hosted zone
+with correct A records pointing to the static IP (34.196.169.203), the
+domain imaginepatch.com was completely unresolvable. All DNS resolvers
+including Google (8.8.8.8), Cloudflare (1.1.1.1), and OpenDNS returned
+"Server failed". Direct queries to AWS nameservers returned "Query refused".
+
+**Root cause identified:**
+DNSViz analysis showed 16 DNSSEC errors and a broken chain of trust between
+the .com TLD and the imaginepatch.com hosted zone. The domain was previously
+registered with GoDaddy which had DNSSEC enabled. When the domain was
+transferred to Route 53, orphaned DNSSEC records remained at the .com TLD
+registry level, causing all DNSSEC-validating resolvers to reject the domain.
+Route 53 showed DnssecKeys as empty, making the issue invisible from the
+console. AWS basic support plan did not include technical cases.
+
+**Options considered:**
+- Upgrade AWS support plan to get technical assistance
+- Enable DNSSEC signing in Route 53 to fix the broken chain
+- Switch DNS to Cloudflare
+
+**Decision:** Cloudflare for DNS and SSL
+
+**Reasoning:**
+Cloudflare bypasses the broken DNSSEC chain entirely by using its own
+nameservers. Switching nameservers in Route 53 Registered Domains from
+AWS to Cloudflare resolved the issue within minutes. Cloudflare also
+provides free SSL, global CDN, and DDoS protection — replacing the need
+for CloudFront in Phase 1 at zero cost. The original architecture planned
+CloudFront for CDN and SSL termination, but Cloudflare provides equivalent
+functionality for free with simpler setup.
+
+**Changes from original architecture:**
+- Route 53 retained for domain registration only
+- Cloudflare handles DNS resolution, CDN, and SSL/TLS
+- CloudFront removed from Phase 1 architecture
+- Architecture diagram updated to reflect this change
+
+**Lessons learned:**
+- Always check DNSSEC status when transferring domains between registrars
+- DNSViz is an essential tool for diagnosing DNS chain issues
+- Having a scoped IAM policy for the Terraform user caused initial CLI
+  access issues — the admin profile was needed for route53domains commands
+- Cloudflare free tier is a viable and superior alternative to CloudFront
+  for small to medium traffic sites
+
 *New decisions will be added to this file as the project evolves.*
 *Format: ADR-XXX — short title, date, status, context, options, decision, reasoning.*
-
