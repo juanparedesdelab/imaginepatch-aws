@@ -153,5 +153,43 @@ security-first thinking for portfolio and career purposes.
 
 ---
 
+## ADR-007 — IAM Admin user: juan-admin with AdministratorAccess
+
+**Date:** 2026-04-07
+**Status:** Accepted
+
+**Context:**
+No human admin user existed outside of root. All elevated operations
+required using the root account which violates AWS security best practices.
+A human admin seat is needed for day-to-day account management, IAM
+changes, and anything requiring elevated permissions beyond the scoped
+developer policy.
+
+**Options considered:**
+- Use root account for admin tasks
+- Create a custom scoped admin policy
+- Use AWS managed AdministratorAccess policy for a dedicated admin user
+
+**Decision:** Dedicated admin user with AWS managed AdministratorAccess
+
+**Reasoning:**
+Using root for operations is a security anti-pattern. A dedicated human
+admin user with AdministratorAccess is the correct AWS approach — it
+provides full account management capability while keeping root credentials
+locked away. Unlike the Terraform service account, this is a human login
+with console access. The choice of AWS managed AdministratorAccess over
+a custom policy is deliberate — the admin role by definition needs full
+access, and a custom policy attempting to replicate that adds complexity
+without security benefit.
+
+**Users created:**
+- `juan-admin` — human admin, AdministratorAccess, console enabled
+- Group: `imaginepatch-admins`
+
+**Root account usage:** Reserved for account-level only tasks such as
+changing payment methods or closing the account. Never used for
+day-to-day operations.
+
 *New decisions will be added to this file as the project evolves.*
 *Format: ADR-XXX — short title, date, status, context, options, decision, reasoning.*
+

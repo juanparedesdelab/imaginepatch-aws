@@ -336,3 +336,25 @@ resource "aws_iam_user_group_membership" "auditor_02" {
   user   = aws_iam_user.auditor_02.name
   groups = [aws_iam_group.readonly.name]
 }
+
+resource "aws_iam_group" "admins" {
+  name = "imaginepatch-admins"
+}
+
+resource "aws_iam_group_policy_attachment" "admins" {
+  group      = aws_iam_group.admins.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
+
+resource "aws_iam_user" "juan_admin" {
+  name = "juan-admin"
+  tags = {
+    status = "active"
+    role   = "administrator"
+  }
+}
+
+resource "aws_iam_user_group_membership" "juan_admin" {
+  user   = aws_iam_user.juan_admin.name
+  groups = [aws_iam_group.admins.name]
+}
