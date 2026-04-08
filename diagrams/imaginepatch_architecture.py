@@ -1,3 +1,4 @@
+from diagrams.custom import Custom
 from diagrams import Diagram, Cluster, Edge
 from diagrams.aws.network import Route53, CloudFront
 from diagrams.aws.compute import Lightsail
@@ -6,15 +7,29 @@ from diagrams.aws.storage import S3
 from diagrams.aws.engagement import SES
 from diagrams.aws.management import Cloudwatch
 from diagrams.aws.security import IAM
-from diagrams.aws.general import User
-from diagrams.onprem.client import User as ExternalUser
-from diagrams.saas.payment import Stripe
+from diagrams.onprem.client import User as Customer
 
 graph_attr = {
-    "fontsize": "20",
+    "fontsize": "12",
     "bgcolor": "white",
-    "pad": "0.5",
-    "splines": "ortho",
+    "pad": "0.8",
+    "splines": "curved",
+    "nodesep": "0.8",
+    "ranksep": "1.0",
+    "dpi": "200",
+}
+
+node_attr = {
+    "fontsize": "12",
+    "fontname": "Arial",
+    "width": "1.2",
+    "height": "1.2",
+    "margin": "0.4,0.3",
+}
+
+edge_attr = {
+    "fontsize": "10",
+    "fontname": "Arial",
 }
 
 with Diagram(
@@ -22,53 +37,63 @@ with Diagram(
     filename="imaginepatch_architecture",
     outformat="png",
     graph_attr=graph_attr,
+    node_attr=node_attr,
+    edge_attr=edge_attr,
     direction="TB",
     show=False,
 ):
-    # External actors
-    user = ExternalUser("Customer")
+    # External actor
+    customer = Customer("Customer")
 
-    # External services
-    with Cluster("External Services"):
-        printful = ExternalUser("Printful API")
-        stripe = Stripe("Stripe")
-
-    # AWS Cloud
+    # AWS Cloud boundary
     with Cluster("AWS Cloud — us-east-1"):
 
-        # DNS + CDN
+        # Edge layer
         with Cluster("Edge Layer"):
             dns = Route53("Route 53\nimaginepatch.com")
             cdn = CloudFront("CloudFront\nCDN + SSL")
 
         # Compute
         with Cluster("Compute"):
-            lightsail = Lightsail("Lightsail\nWordPress + WooCommerce\n$10/month")
+            lightsail = Lightsail("Lightsail\nWordPress\n$10/month")
 
-        # Data
+        # Data layer
         with Cluster("Data Layer"):
-            db = RDS("RDS MySQL\nWooCommerce DB")
-            cache = ElastiCache("ElastiCache\nRedis Cache")
-            storage = S3("S3\nMedia + Backups")
+            db = RDS("RDS MySQL")
+            cache = ElastiCache("ElastiCache\nRedis")
+            storage = S3("S3 Bucket")
 
         # Integrations
         with Cluster("Integrations"):
-            email = SES("SES\nTransactional Email")
+            email = SES("SES Email")
 
-        # Monitoring
-        with Cluster("Monitoring + Security"):
-            monitoring = Cloudwatch("CloudWatch\nLogs + Alerts")
-            iam = IAM("IAM\n5 Groups + Policies")
+    # External services
+    with Cluster("External Services"):
+        printful = Custom("Printful", "./printful.png")
+        stripe = Custom("Stripe", "./stripe.png")
 
-    # Connections
-    user >> Edge(label="HTTPS") >> dns
+    # Monitoring — defined last to push it to bottom
+    with Cluster("Monitoring + Security"):
+        monitoring = Cloudwatch("CloudWatch")
+        iam = IAM("IAM\n5 Groups")
+
+    # Traffic flow
+    customer >> Edge(label="  HTTPS  ") >> dns
     dns >> Edge(label="DNS") >> cdn
     cdn >> Edge(label="Cache miss") >> lightsail
-    lightsail >> Edge(label="Queries") >> db
+
+    # Lightsail to data
+    lightsail >> Edge(label="SQL") >> db
     lightsail >> Edge(label="Cache") >> cache
-    lightsail >> Edge(label="Assets") >> storage
+    lightsail >> Edge(label="Media") >> storage
+
+    # Lightsail to integrations
+    lightsail >> Edge(label="Email") >> email
+
+    # Lightsail to external
     lightsail >> Edge(label="Orders") >> printful
     lightsail >> Edge(label="Payments") >> stripe
-    lightsail >> Edge(label="Email") >> email
+
+    # Monitoring
     lightsail >> Edge(label="Logs") >> monitoring
     iam >> Edge(label="Controls", style="dashed") >> lightsail
