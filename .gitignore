@@ -12,3 +12,16 @@ credentials
 # OS files
 .DS_Store
 Thumbs.db
+
+# Claude Code
+.claude/
+
+# Node / npm (if any tooling added later)
+node_modules/
+
+# VS Code
+.vscode/
+
+# Environment files
+.env
+.env.local

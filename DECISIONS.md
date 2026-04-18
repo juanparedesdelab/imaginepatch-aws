@@ -243,5 +243,55 @@ functionality for free with simpler setup.
 - Cloudflare free tier is a viable and superior alternative to CloudFront
   for small to medium traffic sites
 
+---
+
+## ADR-009 — Frontend: Blocksy + Elementor over custom child theme (Phase 1)
+
+**Date:** 2026-04-17
+**Status:** Accepted
+
+**Context:**
+A full design system and three HTML prototype pages (homepage, shop, product)
+were built prior to WordPress setup. The prototypes define the exact visual
+direction: dark background (#000000/#1A0A2E), purple (#7B2FBE) and gold
+(#F5C842) palette, Y2K Magical / Mystical aesthetic, Pacifico/Fredoka One/
+Nunito/Cormorant Garamond font stack. The question was how to bring this
+approved design into WordPress and WooCommerce.
+
+**Options considered:**
+- Convert HTML prototypes into a custom WooCommerce child theme (PHP templates)
+- Use Blocksy (free base theme) + Elementor (page builder) to recreate the design
+- Find a third-party dark WooCommerce theme and customize it to match
+
+**Decision:** Blocksy + Elementor for Phase 1
+
+**Reasoning:**
+The HTML prototypes serve as a pixel-perfect reference. Blocksy is a
+lightweight, fast base theme with strong WooCommerce hooks and full Elementor
+compatibility. It acts as a blank canvas without imposing its own design
+opinions, allowing the approved design system to be applied globally via
+Blocksy's customizer (colors, fonts) and page-by-page via Elementor.
+Blocksy's free tier is sufficient to evaluate fit before any cost is incurred.
+
+A custom child theme (Option A) is the technically superior long-term
+solution and is planned for Phase 2 — it will also serve as a stronger
+portfolio piece demonstrating PHP/WordPress template development. However,
+it requires significant development time that delays revenue generation,
+which is the Phase 1 priority.
+
+Third-party dark themes (Option C) were ruled out because they have strong
+built-in design opinions that would conflict with the approved design system
+and require more effort to override than building cleanly with Blocksy.
+
+**Phase 2 note:**
+The custom child theme conversion is a planned portfolio milestone. The
+Blocksy + Elementor implementation serves as the functional specification
+for that conversion.
+
+**Store manager impact:**
+Elementor's visual editor allows Angie to manage page content independently
+without code changes, which is a requirement given the division of
+responsibilities on this project.
+
 *New decisions will be added to this file as the project evolves.*
 *Format: ADR-XXX — short title, date, status, context, options, decision, reasoning.*

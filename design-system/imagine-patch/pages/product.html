@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Celestial Night Patch — Imagine Patch</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka+One&family=Nunito:wght@300;400;600;700&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            purple:      '#7B2FBE',
+            'purple-dk': '#5B1A9A',
+            'purple-lt': '#9D4EDD',
+            'purple-dp': '#1A0A2E',
+            midnight:    '#0F0624',
+            gold:        '#F5C842',
+            'gold-lt':   '#FFE580',
+            pink:        '#FF6EB4',
+            'pink-lt':   '#FFB3D9',
+          },
+          fontFamily: {
+            display: ['Pacifico', 'cursive'],
+            heading: ['Fredoka One', 'sans-serif'],
+            body:    ['Nunito', 'sans-serif'],
+            accent:  ['Cormorant Garamond', 'serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ── Reset & base ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: #000; color: #fff; font-family: 'Nunito', sans-serif; overflow-x: hidden; }
+    a { text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    /* ── Animations ───────────────────────────────────── */
+    @media (prefers-reduced-motion: no-preference) {
+      @keyframes rainbow-shift {
+        0%   { background-position: 0% 50%;   }
+        50%  { background-position: 100% 50%; }
+        100% { background-position: 0% 50%;   }
+      }
+      @keyframes star-pulse {
+        0%, 100% { transform: scale(1);    opacity: 0.7; }
+        50%       { transform: scale(1.3); opacity: 1;   }
+      }
+      @keyframes glow-pulse {
+        0%, 100% { box-shadow: 0 0 24px rgba(123,47,190,0.35); }
+        50%       { box-shadow: 0 0 48px rgba(123,47,190,0.65); }
+      }
+      .animate-star { animation: star-pulse 2.2s ease-in-out infinite; }
+      .animate-glow { animation: glow-pulse 3s ease-in-out infinite; }
+    }
+
+    /* ── Rainbow text ─────────────────────────────────── */
+    .rainbow-text {
+      background: linear-gradient(90deg, #FF6B6B, #FF9F43, #FECA57, #48DBFB, #FF9FF3, #9D4EDD, #FF6B6B);
+      background-size: 300% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .rainbow-text { animation: rainbow-shift 5s ease infinite; }
+    }
+
+    /* ── Buttons ──────────────────────────────────────── */
+    .btn-primary {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      background: #7B2FBE; color: #fff; font-family: 'Fredoka One', sans-serif;
+      font-size: 1.05rem; letter-spacing: 0.02em;
+      padding: 14px 36px; border-radius: 4px;
+      border: none; cursor: pointer; text-decoration: none; min-height: 44px;
+      transition: background 200ms ease, transform 150ms ease, box-shadow 200ms ease;
+    }
+    .btn-primary:hover  { background: #5B1A9A; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(123,47,190,0.45); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:focus-visible { outline: 3px solid #F5C842; outline-offset: 3px; }
+
+    .btn-ghost {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      background: transparent; color: #fff; font-family: 'Fredoka One', sans-serif;
+      font-size: 1rem; letter-spacing: 0.02em;
+      padding: 12px 30px; border-radius: 4px;
+      border: 1px solid rgba(255,255,255,0.35); cursor: pointer; text-decoration: none; min-height: 44px;
+      transition: all 200ms ease;
+    }
+    .btn-ghost:hover { border-color: #9D4EDD; color: #C084FC; background: rgba(123,47,190,0.1); }
+    .btn-ghost:focus-visible { outline: 3px solid #F5C842; outline-offset: 3px; }
+
+    /* ── Product image gallery ────────────────────────── */
+    .main-image-wrap {
+      position: relative; overflow: hidden;
+      background: #0A0A0A;
+      aspect-ratio: 1 / 1;
+    }
+    .main-image-wrap svg { width: 100%; height: 100%; display: block; }
+
+    .thumb {
+      position: relative; cursor: pointer; overflow: hidden;
+      aspect-ratio: 1 / 1; background: #0A0A0A;
+      border: 2px solid transparent;
+      transition: border-color 200ms ease;
+      flex: 1; min-width: 0;
+    }
+    .thumb:hover   { border-color: rgba(123,47,190,0.5); }
+    .thumb.active  { border-color: #7B2FBE; }
+    .thumb svg     { width: 100%; height: 100%; display: block; }
+    .thumb:focus-visible { outline: 2px solid #F5C842; outline-offset: 2px; }
+
+    /* ── Variant pills ────────────────────────────────── */
+    .variant-pill {
+      display: inline-flex; align-items: center; justify-content: center;
+      font-family: 'Fredoka One', sans-serif; font-size: 0.88rem;
+      padding: 8px 20px; border-radius: 4px; cursor: pointer; min-height: 44px;
+      border: 1px solid rgba(255,255,255,0.15);
+      color: rgba(255,255,255,0.55);
+      background: transparent;
+      transition: all 200ms ease;
+    }
+    .variant-pill:hover { border-color: rgba(123,47,190,0.6); color: #fff; }
+    .variant-pill.active { background: #7B2FBE; border-color: #7B2FBE; color: #fff; }
+    .variant-pill:focus-visible { outline: 2px solid #F5C842; outline-offset: 2px; }
+
+    /* ── Quantity selector ────────────────────────────── */
+    .qty-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; cursor: pointer;
+      background: #111; border: 1px solid rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.7); font-size: 1.1rem;
+      transition: all 200ms ease; user-select: none;
+      min-width: 44px; min-height: 44px;
+    }
+    .qty-btn:hover { border-color: #7B2FBE; color: #fff; background: rgba(123,47,190,0.15); }
+    .qty-btn:focus-visible { outline: 2px solid #F5C842; outline-offset: 2px; }
+    .qty-display {
+      display: flex; align-items: center; justify-content: center;
+      width: 52px; height: 40px; min-height: 44px;
+      background: #111; border-top: 1px solid rgba(255,255,255,0.12);
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      font-family: 'Fredoka One', sans-serif; font-size: 1rem; color: #fff;
+      user-select: none;
+    }
+
+    /* ── Trust badges ─────────────────────────────────── */
+    .trust-badge {
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      flex: 1;
+    }
+    .trust-badge svg { color: #9D4EDD; }
+    .trust-badge p { font-family: 'Cormorant Garamond', serif; font-style: italic;
+                     font-size: 0.75rem; color: rgba(255,255,255,0.4);
+                     text-align: center; line-height: 1.3; }
+
+    /* ── Accordion ────────────────────────────────────── */
+    .accordion-item { border-top: 1px solid rgba(255,255,255,0.07); }
+    .accordion-item:last-child { border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .accordion-trigger {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 0; cursor: pointer; background: transparent; border: none;
+      font-family: 'Fredoka One', sans-serif; font-size: 0.95rem;
+      color: rgba(255,255,255,0.7); text-align: left;
+      transition: color 200ms ease;
+    }
+    .accordion-trigger:hover { color: #fff; }
+    .accordion-trigger:focus-visible { outline: 2px solid #F5C842; outline-offset: 2px; }
+    .accordion-trigger .icon {
+      flex-shrink: 0; transition: transform 250ms ease;
+      color: rgba(157,78,221,0.7);
+    }
+    .accordion-trigger[aria-expanded="true"] .icon { transform: rotate(45deg); }
+    .accordion-body {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 300ms ease, padding 200ms ease;
+    }
+    .accordion-body.open { max-height: 400px; }
+    .accordion-body-inner {
+      padding-bottom: 16px;
+      font-family: 'Nunito', sans-serif; font-size: 0.88rem;
+      color: rgba(255,255,255,0.45); line-height: 1.75;
+    }
+    .accordion-body-inner ul { padding-left: 18px; }
+    .accordion-body-inner li { margin-bottom: 4px; }
+
+    /* ── Product cards (shop grid) ────────────────────── */
+    .product-card {
+      background: #0A0A0A; cursor: pointer;
+      position: relative; overflow: hidden;
+      transition: transform 250ms ease-out;
+    }
+    .product-card:hover { transform: translateY(-3px); }
+    .product-card:focus-within { outline: 2px solid #7B2FBE; outline-offset: 2px; }
+    .product-card .card-img { position: relative; overflow: hidden; aspect-ratio: 1 / 1; }
+    .product-card .card-img::after {
+      content: ''; position: absolute; inset: 0;
+      box-shadow: inset 0 0 0 1px rgba(123,47,190,0);
+      transition: box-shadow 250ms ease-out;
+    }
+    .product-card:hover .card-img::after { box-shadow: inset 0 0 0 2px #7B2FBE; }
+    .product-card .card-glow {
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 80%, rgba(123,47,190,0.35) 0%, transparent 65%);
+      opacity: 0; transition: opacity 250ms ease-out; pointer-events: none;
+    }
+    .product-card:hover .card-glow { opacity: 1; }
+    .product-card .quick-add {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: #7B2FBE; color: #fff;
+      font-family: 'Fredoka One', sans-serif; font-size: 0.85rem;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      padding: 10px; text-align: center;
+      transform: translateY(100%); transition: transform 240ms ease-out; cursor: pointer;
+    }
+    .product-card:hover .quick-add { transform: translateY(0); }
+    .product-card .card-info { padding: 10px 2px 14px; }
+    .product-card .card-name  { font-family: 'Fredoka One', sans-serif; font-size: 0.95rem; color: #fff; line-height: 1.3; }
+    .product-card .card-sub   { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 0.78rem; color: rgba(255,255,255,0.45); margin-top: 2px; }
+    .product-card .card-price { font-family: 'Fredoka One', sans-serif; font-size: 1rem; color: #9D4EDD; margin-top: 4px; }
+
+    /* ── Review cards ─────────────────────────────────── */
+    .review-card {
+      background: #0A0A0A; border: 1px solid rgba(123,47,190,0.18); padding: 24px;
+    }
+
+    /* ── Badges ───────────────────────────────────────── */
+    .badge {
+      display: inline-block; padding: 3px 10px; font-size: 0.7rem;
+      font-family: 'Cormorant Garamond', serif; font-style: italic;
+      letter-spacing: 0.04em;
+    }
+    .badge-gold   { background: #F5C842; color: #000; }
+    .badge-pink   { background: #FF6EB4; color: #fff; }
+    .badge-mystic { background: #1A0A2E; color: #F5C842; border: 1px solid rgba(245,200,66,0.3); }
+    .badge-new    { background: #7B2FBE; color: #fff; }
+
+    /* ── Newsletter ───────────────────────────────────── */
+    .nl-input {
+      flex: 1; min-width: 0;
+      background: #111; border: 1px solid rgba(123,47,190,0.4);
+      color: #fff; font-family: 'Nunito', sans-serif; font-size: 0.9rem;
+      padding: 12px 16px; outline: none; transition: border-color 200ms ease;
+    }
+    .nl-input::placeholder { color: rgba(255,255,255,0.35); }
+    .nl-input:focus { border-color: #7B2FBE; }
+
+    /* ── Misc ─────────────────────────────────────────── */
+    .section-label {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 0.87rem; letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(255,255,255,0.88);
+      background: linear-gradient(90deg, #FF6B6B, #FF9F43, #FECA57, #48DBFB, #FF9FF3, #9D4EDD, #FF6B6B);
+      background-size: 300% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .section-label:hover { -webkit-text-fill-color: rgba(255,255,255,0.95); }
+    @media (prefers-reduced-motion: no-preference) {
+      .section-label { animation: rainbow-shift 6s ease infinite; }
+    }
+    .nav-link {
+      font-family: 'Fredoka One', sans-serif; font-size: 1rem;
+      background: linear-gradient(90deg, #FF6B6B, #FF9F43, #FECA57, #48DBFB, #FF9FF3, #9D4EDD, #FF6B6B);
+      background-size: 300% auto;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      opacity: 0.85; transition: opacity 200ms ease;
+    }
+    .nav-link:hover { opacity: 1; }
+    .nav-link:focus-visible { outline: 2px solid #F5C842; outline-offset: 3px; opacity: 1; }
+    @media (prefers-reduced-motion: no-preference) {
+      .nav-link { animation: rainbow-shift 5s ease infinite; }
+    }
+    #mobile-nav { display: none; }
+    #mobile-nav.open { display: block; }
+    #announcement-bar { transition: height 200ms ease, opacity 200ms ease; overflow: hidden; }
+    #announcement-bar.dismissed { height: 0 !important; opacity: 0; }
+    .divider { height: 1px; background: rgba(255,255,255,0.07); }
+
+    /* ── Star row ─────────────────────────────────────── */
+    .star-row { display: flex; align-items: center; gap: 2px; }
+  </style>
+</head>
+
+<body>
+
+<!-- ═══════════════════════════════════════════
+     ANNOUNCEMENT BAR
+═══════════════════════════════════════════════ -->
+<div id="announcement-bar" role="banner" style="height:36px">
+  <div class="relative flex items-center justify-center h-[36px] px-8 bg-black border-b border-[rgba(255,255,255,0.06)]">
+    <p class="text-[11px] tracking-[0.12em] uppercase font-body text-center">
+      <span class="rainbow-text font-semibold">Free shipping on orders over $50</span>
+      <span class="text-white/50 mx-2 hidden sm:inline">·</span>
+      <span class="text-white/50 text-[11px] hidden sm:inline">New drops every Friday · Code <strong class="text-gold">MAGIC10</strong> for 10% off</span>
+    </p>
+    <button
+      id="dismiss-bar"
+      class="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-white/40 hover:text-white transition-colors cursor-pointer"
+      aria-label="Dismiss announcement"
+    >
+      <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+        <line x1="1" y1="1" x2="11" y2="11"/><line x1="11" y1="1" x2="1" y2="11"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     HEADER / NAV
+═══════════════════════════════════════════════ -->
+<header id="site-header" class="sticky top-0 z-[30] bg-black border-b border-[rgba(255,255,255,0.07)]">
+  <div class="flex items-center h-[52px] md:h-[60px] px-4 md:px-6 lg:px-10">
+
+    <!-- Logo -->
+    <a href="/" class="flex items-center gap-2 flex-shrink-0 cursor-pointer z-10" aria-label="Imagine Patch home">
+      <svg width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M6 26 L20 6" stroke="#F5C842" stroke-width="2" stroke-linecap="round"/>
+        <polygon points="20,6 23,11 17,11" fill="#F5C842"/>
+        <path d="M4 22 Q16 6 28 22" stroke="url(#rn-hd)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <path d="M25 9 L26 7 L27 9 L29 10 L27 11 L26 13 L25 11 L23 10Z" fill="#9D4EDD"/>
+        <defs>
+          <linearGradient id="rn-hd" x1="4" y1="22" x2="28" y2="22">
+            <stop offset="0%"   stop-color="#FF6B6B"/>
+            <stop offset="50%"  stop-color="#FECA57"/>
+            <stop offset="100%" stop-color="#9D4EDD"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="font-display text-purple text-xl md:text-2xl leading-none tracking-tight"
+            style="text-shadow: 0 0 24px rgba(157,78,221,0.55)">
+        Imagine Patch
+      </span>
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-7" aria-label="Main navigation">
+      <a href="/shop"        class="nav-link cursor-pointer py-2">Shop</a>
+      <a href="/custom"      class="nav-link cursor-pointer py-2">Custom</a>
+      <a href="/collections" class="nav-link cursor-pointer py-2">Collections</a>
+      <a href="/about"       class="nav-link cursor-pointer py-2">Our Story</a>
+    </nav>
+
+    <!-- Right icons -->
+    <div class="flex items-center gap-1 ml-auto">
+      <button class="hidden md:flex items-center justify-center w-10 h-10 hover:bg-white/8 rounded transition-colors cursor-pointer" aria-label="Search" style="--tw-bg-opacity:0.08">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+      </button>
+      <a href="/cart" class="relative flex items-center justify-center w-10 h-10 hover:bg-white/8 rounded transition-colors cursor-pointer" aria-label="Cart, 3 items" style="--tw-bg-opacity:0.08">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <span class="absolute top-1.5 right-1.5 w-[14px] h-[14px] bg-purple rounded-full text-[9px] font-heading text-white flex items-center justify-center leading-none" aria-hidden="true">3</span>
+      </a>
+      <button id="menu-toggle"
+        class="md:hidden flex items-center justify-center w-10 h-10 hover:bg-white/8 rounded transition-colors cursor-pointer ml-1"
+        aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav"
+        style="--tw-bg-opacity:0.08">
+        <svg id="menu-icon-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <line x1="3" y1="6"  x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+        <svg id="menu-icon-close" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+          <line x1="4" y1="4" x2="20" y2="20"/>
+          <line x1="20" y1="4" x2="4" y2="20"/>
+        </svg>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Mobile nav drawer -->
+  <div id="mobile-nav" role="dialog" aria-label="Mobile navigation">
+    <div class="divider"></div>
+    <nav class="flex flex-col bg-black px-6 py-4">
+      <a href="/shop"        class="font-heading text-lg text-white/80 hover:text-white py-3 border-b border-[rgba(255,255,255,0.06)] cursor-pointer transition-colors">Shop</a>
+      <a href="/custom"      class="font-heading text-lg text-white/80 hover:text-white py-3 border-b border-[rgba(255,255,255,0.06)] cursor-pointer transition-colors">Custom Patches</a>
+      <a href="/collections" class="font-heading text-lg text-white/80 hover:text-white py-3 border-b border-[rgba(255,255,255,0.06)] cursor-pointer transition-colors">Collections</a>
+      <a href="/about"       class="font-heading text-lg text-white/80 hover:text-white py-3 cursor-pointer transition-colors">Our Story</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     BREADCRUMB
+═══════════════════════════════════════════════ -->
+<div class="bg-black border-b border-[rgba(255,255,255,0.05)]">
+  <div class="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-10 py-3">
+    <nav aria-label="Breadcrumb">
+      <ol class="flex items-center flex-wrap gap-x-2 gap-y-1">
+        <li class="flex items-center gap-2">
+          <a href="/" class="font-body text-white/30 text-xs hover:text-white/60 transition-colors cursor-pointer tracking-wide">Home</a>
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>
+        </li>
+        <li class="flex items-center gap-2">
+          <a href="/shop" class="font-body text-white/30 text-xs hover:text-white/60 transition-colors cursor-pointer tracking-wide">Shop</a>
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>
+        </li>
+        <li class="flex items-center gap-2">
+          <a href="/collections/celestial" class="font-body text-white/30 text-xs hover:text-white/60 transition-colors cursor-pointer tracking-wide">Celestial Collection</a>
+          <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M4 2l4 4-4 4"/></svg>
+        </li>
+        <li>
+          <span class="font-body text-white/55 text-xs tracking-wide" aria-current="page">Celestial Night Patch</span>
+        </li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+     PRODUCT SECTION — 2-column layout
+═══════════════════════════════════════════════ -->
+<section class="bg-black" aria-label="Product details">
+  <div class="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-10 py-10 lg:py-14">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-14">
+
+
+      <!-- ══════════════════════════════════════
+           LEFT — Image gallery
+      ═══════════════════════════════════════════ -->
+      <div class="flex flex-col gap-3">
+
+        <!-- Main image -->
+        <div class="main-image-wrap animate-glow" id="main-image" style="border-radius:4px">
+          <!-- View 1: Full patch illustration — Celestial Night -->
+          <svg id="img-1" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg" style="background:#0A0A0A">
+            <!-- Patch border / felt base -->
+            <rect x="50" y="50" width="500" height="500" rx="90" fill="#0D0520" stroke="#7B2FBE" stroke-width="8"/>
+            <!-- Outer embroidery stitch ring -->
+            <rect x="50" y="50" width="500" height="500" rx="90" fill="none" stroke="#5B1A9A" stroke-width="3" stroke-dasharray="6 9" opacity=".5"/>
+
+            <!-- Deep space background gradient -->
+            <defs>
+              <radialGradient id="space-bg" cx="50%" cy="40%" r="55%">
+                <stop offset="0%"   stop-color="#1A0A2E"/>
+                <stop offset="100%" stop-color="#080415"/>
+              </radialGradient>
+              <radialGradient id="moon-glow" cx="50%" cy="50%" r="50%">
+                <stop offset="0%"   stop-color="#FFE580" stop-opacity=".35"/>
+                <stop offset="100%" stop-color="transparent"/>
+              </radialGradient>
+              <radialGradient id="moon-face" cx="38%" cy="38%" r="55%">
+                <stop offset="0%"   stop-color="#FFE580"/>
+                <stop offset="60%"  stop-color="#F5C842"/>
+                <stop offset="100%" stop-color="#C89B00"/>
+              </radialGradient>
+              <clipPath id="patch-clip">
+                <rect x="50" y="50" width="500" height="500" rx="90"/>
+              </clipPath>
+            </defs>
+
+            <!-- Space bg fill -->
+            <rect x="50" y="50" width="500" height="500" rx="90" fill="url(#space-bg)"/>
+
+            <!-- Nebula wisp left -->
+            <ellipse cx="160" cy="280" rx="90" ry="50" fill="#7B2FBE" opacity=".08" transform="rotate(-30 160 280)" clip-path="url(#patch-clip)"/>
+            <!-- Nebula wisp right -->
+            <ellipse cx="450" cy="350" rx="80" ry="45" fill="#FF6EB4" opacity=".06" transform="rotate(20 450 350)" clip-path="url(#patch-clip)"/>
+
+            <!-- Moon glow halo -->
+            <circle cx="300" cy="240" r="130" fill="url(#moon-glow)" clip-path="url(#patch-clip)"/>
+
+            <!-- Crescent moon -->
+            <path d="M300 130 A110 110 0 1 0 300 350 A80 80 0 1 1 300 130Z" fill="url(#moon-face)" clip-path="url(#patch-clip)"/>
+            <!-- Moon craters -->
+            <circle cx="270" cy="210" r="14" fill="rgba(0,0,0,0.08)"/>
+            <circle cx="315" cy="270" r="9"  fill="rgba(0,0,0,0.07)"/>
+            <circle cx="255" cy="260" r="6"  fill="rgba(0,0,0,0.06)"/>
+            <!-- Moon face highlight -->
+            <ellipse cx="280" cy="168" rx="22" ry="14" fill="rgba(255,255,255,0.22)" transform="rotate(-20 280 168)"/>
+
+            <!-- Stars — large -->
+            <polygon points="150,140 154,158 172,158 158,169 163,187 150,177 137,187 142,169 128,158 146,158" fill="#FFE580" opacity=".9"/>
+            <polygon points="450,130 453,144 467,144 456,153 460,167 450,159 440,167 444,153 433,144 447,144" fill="#FFE580" opacity=".85"/>
+            <polygon points="120,390 123,401 134,401 125,408 128,419 120,413 112,419 115,408 106,401 117,401" fill="#fff"    opacity=".5"/>
+            <polygon points="480,400 483,410 493,410 485,416 488,426 480,420 472,426 475,416 467,410 477,410" fill="#FFE580" opacity=".65"/>
+
+            <!-- Stars — small scattered -->
+            <circle cx="200" cy="110" r="2.5" fill="#fff"    opacity=".55"/>
+            <circle cx="380" cy="100" r="3"   fill="#FFE580" opacity=".6"/>
+            <circle cx="500" cy="200" r="2"   fill="#9D4EDD" opacity=".8"/>
+            <circle cx="95"  cy="320" r="2"   fill="#FF9FF3" opacity=".6"/>
+            <circle cx="520" cy="320" r="2.5" fill="#fff"    opacity=".4"/>
+            <circle cx="170" cy="460" r="2"   fill="#FFE580" opacity=".5"/>
+            <circle cx="430" cy="470" r="2.5" fill="#9D4EDD" opacity=".6"/>
+            <circle cx="300" cy="490" r="2"   fill="#fff"    opacity=".35"/>
+            <circle cx="355" cy="120" r="1.5" fill="#FF9FF3" opacity=".55"/>
+            <circle cx="245" cy="130" r="1.5" fill="#fff"    opacity=".4"/>
+            <circle cx="80"  cy="160" r="2"   fill="#FFE580" opacity=".45"/>
+            <circle cx="520" cy="140" r="1.5" fill="#fff"    opacity=".35"/>
+
+            <!-- Constellation dots + lines (Orion-ish) -->
+            <circle cx="115" cy="440" r="3" fill="#9D4EDD" opacity=".8"/>
+            <circle cx="145" cy="415" r="3" fill="#9D4EDD" opacity=".8"/>
+            <circle cx="175" cy="430" r="3" fill="#9D4EDD" opacity=".8"/>
+            <circle cx="160" cy="395" r="3" fill="#9D4EDD" opacity=".7"/>
+            <circle cx="130" cy="375" r="3" fill="#9D4EDD" opacity=".7"/>
+            <line x1="115" y1="440" x2="145" y2="415" stroke="#9D4EDD" stroke-width="1" opacity=".35"/>
+            <line x1="145" y1="415" x2="175" y2="430" stroke="#9D4EDD" stroke-width="1" opacity=".35"/>
+            <line x1="145" y1="415" x2="160" y2="395" stroke="#9D4EDD" stroke-width="1" opacity=".35"/>
+            <line x1="160" y1="395" x2="130" y2="375" stroke="#9D4EDD" stroke-width="1" opacity=".35"/>
+
+            <!-- Shooting star -->
+            <line x1="400" y1="170" x2="460" y2="130" stroke="#FFE580" stroke-width="2.5" stroke-linecap="round" opacity=".7"/>
+            <polygon points="400,170 404,180 412,176" fill="#FFE580" opacity=".85"/>
+
+            <!-- Bottom text arc — "CELESTIAL NIGHT" -->
+            <path id="arc-text" d="M 130 460 A 175 175 0 0 0 470 460" fill="none"/>
+            <text font-family="'Fredoka One', sans-serif" font-size="22" fill="#9D4EDD" opacity=".7" letter-spacing="5">
+              <textPath href="#arc-text" startOffset="50%" text-anchor="middle">CELESTIAL NIGHT</textPath>
+            </text>
+
+            <!-- Small hearts accent -->
+            <path d="M490 250 Q494 246 498 250 Q502 246 506 250 Q506 255 498 262 Q490 255 490 250Z" fill="#FF6EB4" opacity=".6"/>
+            <path d="M88 230 Q91 227 94 230 Q97 227 100 230 Q100 234 94 240 Q88 234 88 230Z" fill="#FF6EB4" opacity=".5"/>
+
+            <!-- Purple sparkle clusters -->
+            <g opacity=".75">
+              <line x1="456" y1="300" x2="456" y2="292" stroke="#9D4EDD" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="456" y1="308" x2="456" y2="316" stroke="#9D4EDD" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="448" y1="300" x2="440" y2="300" stroke="#9D4EDD" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="464" y1="300" x2="472" y2="300" stroke="#9D4EDD" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="450" y1="294" x2="445" y2="289" stroke="#9D4EDD" stroke-width="1"   stroke-linecap="round"/>
+              <line x1="462" y1="294" x2="467" y2="289" stroke="#9D4EDD" stroke-width="1"   stroke-linecap="round"/>
+              <line x1="450" y1="306" x2="445" y2="311" stroke="#9D4EDD" stroke-width="1"   stroke-linecap="round"/>
+              <line x1="462" y1="306" x2="467" y2="311" stroke="#9D4EDD" stroke-width="1"   stroke-linecap="round"/>
+            </g>
+          </svg>
+        </div><!-- /main-image-wrap -->
+
+        <!-- Thumbnail row -->
+        <div class="flex gap-2" role="group" aria-label="Product image thumbnails">
+
+          <!-- Thumb 1 — Front view (active) -->
+          <button class="thumb active" id="thumb-1" aria-label="View 1: Full patch" aria-pressed="true" style="border-radius:3px">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="background:#0A0A0A">
+              <rect x="15" y="15" width="170" height="170" rx="30" fill="#0D0520" stroke="#7B2FBE" stroke-width="3"/>
+              <path d="M100 45 A55 55 0 1 0 100 155 A40 40 0 1 1 100 45Z" fill="#F5C842"/>
+              <circle cx="58"  cy="68"  r="10" fill="#FFE580" opacity=".7"/>
+              <circle cx="142" cy="62"  r="8"  fill="#FFE580" opacity=".65"/>
+              <circle cx="50"  cy="135" r="6"  fill="#9D4EDD" opacity=".8"/>
+              <circle cx="155" cy="140" r="6"  fill="#9D4EDD" opacity=".75"/>
+            </svg>
+          </button>
+
+          <!-- Thumb 2 — Detail / close-up -->
+          <button class="thumb" id="thumb-2" aria-label="View 2: Embroidery detail" aria-pressed="false" style="border-radius:3px">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="background:#0A0A0A">
+              <!-- Zoomed into the moon texture -->
+              <rect width="200" height="200" fill="#0D0520"/>
+              <!-- Moon fill close-up -->
+              <path d="M-20 20 A140 140 0 1 0 180 220 A100 100 0 1 1 -20 20Z" fill="#F5C842"/>
+              <!-- Crater detail -->
+              <circle cx="70"  cy="90"  r="22" fill="rgba(0,0,0,0.1)"/>
+              <circle cx="130" cy="130" r="15" fill="rgba(0,0,0,0.08)"/>
+              <circle cx="55"  cy="145" r="10" fill="rgba(0,0,0,0.07)"/>
+              <!-- Embroidery thread lines -->
+              <line x1="0"   y1="20"  x2="200" y2="20"  stroke="#C89B00" stroke-width="1.5" opacity=".2"/>
+              <line x1="0"   y1="40"  x2="200" y2="40"  stroke="#C89B00" stroke-width="1.5" opacity=".2"/>
+              <line x1="0"   y1="60"  x2="200" y2="60"  stroke="#C89B00" stroke-width="1.5" opacity=".2"/>
+              <line x1="0"   y1="80"  x2="200" y2="80"  stroke="#C89B00" stroke-width="1.5" opacity=".2"/>
+              <line x1="0"   y1="100" x2="200" y2="100" stroke="#C89B00" stroke-width="1.5" opacity=".2"/>
+              <line x1="0"   y1="120" x2="200" y2="120" stroke="#C89B00" stroke-width="1.5" opacity=".2"/>
+              <!-- Highlight -->
+              <ellipse cx="90" cy="55" rx="35" ry="22" fill="rgba(255,255,255,0.18)" transform="rotate(-20 90 55)"/>
+              <!-- Purple border edge -->
+              <rect x="0" y="0" width="200" height="200" fill="none" stroke="#7B2FBE" stroke-width="6" opacity=".6"/>
+            </svg>
+          </button>
+
+          <!-- Thumb 3 — On denim jacket -->
+          <button class="thumb" id="thumb-3" aria-label="View 3: Styled on jacket" aria-pressed="false" style="border-radius:3px">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="background:#111">
+              <!-- Denim-ish background -->
+              <rect width="200" height="200" fill="#1A2340"/>
+              <!-- Fabric texture lines -->
+              <line x1="0"   y1="0"   x2="200" y2="200" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
+              <line x1="0"   y1="40"  x2="160" y2="200" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
+              <line x1="40"  y1="0"   x2="200" y2="160" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
+              <line x1="0"   y1="80"  x2="120" y2="200" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
+              <line x1="80"  y1="0"   x2="200" y2="120" stroke="rgba(255,255,255,0.04)" stroke-width="8"/>
+              <!-- Patch on jacket -->
+              <rect x="50" y="50" width="100" height="100" rx="18" fill="#0D0520" stroke="#7B2FBE" stroke-width="3"/>
+              <path d="M100 62 A38 38 0 1 0 100 138 A27 27 0 1 1 100 62Z" fill="#F5C842"/>
+              <circle cx="68"  cy="75"  r="7" fill="#FFE580" opacity=".8"/>
+              <circle cx="135" cy="72"  r="5" fill="#FFE580" opacity=".7"/>
+              <circle cx="62"  cy="125" r="4" fill="#9D4EDD" opacity=".9"/>
+              <circle cx="140" cy="128" r="4" fill="#9D4EDD" opacity=".8"/>
+              <!-- Stitching suggestion -->
+              <rect x="50" y="50" width="100" height="100" rx="18" fill="none" stroke="#5B1A9A" stroke-width="1.5" stroke-dasharray="3 5" opacity=".5"/>
+            </svg>
+          </button>
+
+          <!-- Thumb 4 — Flat lay / packaging -->
+          <button class="thumb" id="thumb-4" aria-label="View 4: Packaging and flat lay" aria-pressed="false" style="border-radius:3px">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="background:#0A0A0A">
+              <!-- Kraft card backing -->
+              <rect x="60" y="25" width="80" height="110" rx="4" fill="#2A1F14" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+              <!-- Header hole -->
+              <circle cx="100" cy="38" r="6" fill="#0A0A0A" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+              <!-- Brand name on card -->
+              <rect x="72" y="52" width="56" height="6" rx="2" fill="#7B2FBE" opacity=".6"/>
+              <rect x="80" y="62" width="40" height="4" rx="1" fill="rgba(255,255,255,0.15)"/>
+              <!-- Patch on card -->
+              <rect x="70" y="76" width="60" height="60" rx="10" fill="#0D0520" stroke="#7B2FBE" stroke-width="2"/>
+              <path d="M100 83 A23 23 0 1 0 100 130 A17 17 0 1 1 100 83Z" fill="#F5C842"/>
+              <circle cx="83"  cy="91"  r="5" fill="#FFE580" opacity=".8"/>
+              <circle cx="118" cy="90"  r="4" fill="#9D4EDD" opacity=".9"/>
+              <!-- Stars scattered around card -->
+              <polygon points="42,60 44,66 50,66 45,70 47,76 42,72 37,76 39,70 34,66 40,66" fill="#F5C842" opacity=".5"/>
+              <circle cx="158" cy="80"  r="3" fill="#9D4EDD" opacity=".6"/>
+              <circle cx="40"  cy="140" r="2" fill="#FF9FF3" opacity=".5"/>
+              <circle cx="162" cy="150" r="2" fill="#FFE580" opacity=".55"/>
+              <!-- Shadow under card -->
+              <ellipse cx="100" cy="142" rx="42" ry="6" fill="#000" opacity=".4"/>
+            </svg>
+          </button>
+
+        </div><!-- /thumb row -->
+
+      </div><!-- /left column -->
+
+
+      <!-- ══════════════════════════════════════
+           RIGHT — Product details
+      ═══════════════════════════════════════════ -->
+      <div class="flex flex-col gap-5">
+
+        <!-- Badge -->
+        <div>
+          <span class="badge badge-gold">Bestseller</span>
+        </div>
+
+        <!-- Product name -->
+        <div>
+          <h1 class="font-display text-white leading-tight"
+              style="font-size: clamp(2rem, 4vw, 3rem); text-shadow: 0 0 40px rgba(157,78,221,0.35)">
+            Celestial Night Patch
+          </h1>
+          <p class="font-accent italic text-white/35 text-sm mt-1">
+            Embroidered iron-on · Limited edition celestial series
+          </p>
+        </div>
+
+        <!-- Rating row -->
+        <div class="flex items-center gap-3">
+          <div class="star-row" aria-label="4.9 out of 5 stars">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          </div>
+          <span class="font-body text-white/40 text-sm">4.9</span>
+          <a href="#reviews" class="font-body text-purple-lt text-sm hover:text-white transition-colors cursor-pointer">
+            312 reviews
+          </a>
+          <span class="text-white/15 text-sm">·</span>
+          <span class="font-accent italic text-white/30 text-xs">847 sold</span>
+        </div>
+
+        <!-- Price -->
+        <div class="flex items-baseline gap-3">
+          <span class="font-heading text-gold-lt text-3xl" aria-label="Sale price: $18.99">$18.99</span>
+          <span class="font-heading text-white/25 text-lg line-through" aria-label="Regular price: $24.99">$24.99</span>
+          <span class="badge badge-pink" style="font-size:0.65rem">Save 24%</span>
+        </div>
+
+        <!-- Description -->
+        <p class="font-body text-white/55 text-sm leading-relaxed" style="max-width:48ch">
+          Hand-crafted with 12-weight embroidery thread on premium felt backing. The Celestial Night captures a crescent moon surrounded by a constellation field — perfect for jean jackets, bags, hats, or anywhere that needs a little magic.
+        </p>
+
+        <div class="divider"></div>
+
+        <!-- Size variant selector -->
+        <fieldset class="flex flex-col gap-3">
+          <legend class="font-heading text-white text-sm tracking-wide mb-1">
+            Size
+            <span class="font-accent italic text-white/30 font-normal text-xs ml-2">(iron-on diameter)</span>
+          </legend>
+          <div class="flex flex-wrap gap-2" role="group" aria-label="Select size">
+            <button class="variant-pill" data-size="small"  aria-pressed="false">
+              Small<span class="font-accent italic text-[0.7rem] text-white/35 ml-1.5">1.5"</span>
+            </button>
+            <button class="variant-pill active" data-size="medium" aria-pressed="true">
+              Medium<span class="font-accent italic text-[0.7rem] text-white/50 ml-1.5">2.5"</span>
+            </button>
+            <button class="variant-pill" data-size="large"  aria-pressed="false">
+              Large<span class="font-accent italic text-[0.7rem] text-white/35 ml-1.5">3.5"</span>
+            </button>
+            <button class="variant-pill" data-size="xl"     aria-pressed="false">
+              XL<span class="font-accent italic text-[0.7rem] text-white/35 ml-1.5">4.5"</span>
+            </button>
+          </div>
+        </fieldset>
+
+        <!-- Quantity + Add to Cart row -->
+        <div class="flex flex-col sm:flex-row gap-3">
+
+          <!-- Quantity selector -->
+          <div class="flex items-stretch flex-shrink-0" role="group" aria-label="Quantity">
+            <button class="qty-btn" id="qty-minus" aria-label="Decrease quantity" style="border-radius:4px 0 0 4px">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <div class="qty-display" id="qty-value" aria-live="polite" aria-atomic="true">1</div>
+            <button class="qty-btn" id="qty-plus"  aria-label="Increase quantity" style="border-radius:0 4px 4px 0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+
+          <!-- Add to Cart -->
+          <button class="btn-primary w-full" id="add-to-cart" aria-label="Add Celestial Night Patch to cart">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+            Add to Cart
+          </button>
+
+        </div>
+
+        <!-- Design Your Own -->
+        <a href="/custom" class="btn-ghost w-full" aria-label="Design your own custom patch">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+          </svg>
+          Design Your Own
+        </a>
+
+        <!-- Wishlist link -->
+        <button class="flex items-center justify-center gap-2 font-body text-white/30 text-xs hover:text-pink transition-colors cursor-pointer py-1" aria-label="Save to wishlist" id="product-wishlist">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span id="wishlist-label">Save to Wishlist</span>
+        </button>
+
+        <div class="divider"></div>
+
+        <!-- Trust badges -->
+        <div class="flex items-start gap-4 py-1" aria-label="Guarantees and shipping info">
+
+          <div class="trust-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" style="color:#9D4EDD">
+              <rect x="1" y="3" width="15" height="13" rx="1"/>
+              <path d="M16 8h4l3 4v4h-7V8z"/>
+              <circle cx="5.5" cy="18.5" r="2.5"/>
+              <circle cx="18.5" cy="18.5" r="2.5"/>
+            </svg>
+            <p>Free Shipping<br/>over $50</p>
+          </div>
+
+          <div class="trust-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" style="color:#9D4EDD">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <p>Handcrafted<br/>Quality</p>
+          </div>
+
+          <div class="trust-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" style="color:#9D4EDD">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            <p>Satisfaction<br/>Guaranteed</p>
+          </div>
+
+          <div class="trust-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true" style="color:#9D4EDD">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+            <p>Easy Returns<br/>30 days</p>
+          </div>
+
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Accordion -->
+        <div id="accordion" class="flex flex-col">
+
+          <!-- Item 1 — Description -->
+          <div class="accordion-item">
+            <button class="accordion-trigger" aria-expanded="true" aria-controls="acc-desc" id="acc-desc-btn">
+              <span>Description</span>
+              <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+            <div class="accordion-body open" id="acc-desc" role="region" aria-labelledby="acc-desc-btn">
+              <div class="accordion-body-inner">
+                <p>The Celestial Night Patch is part of our limited edition Mystic Skies series — hand-embroidered by skilled artisans using 12-weight rayon thread for vivid, long-lasting color. The deep navy felt base is cut to a rounded square with slightly softened corners, giving it a premium sewn-on look even when iron-applied.</p>
+                <br/>
+                <p>Perfect for personalising jean jackets, backpacks, hats, totes, or anywhere that needs a touch of magic. Each patch ships on a branded card backing with application instructions included.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Item 2 — Materials & Care -->
+          <div class="accordion-item">
+            <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-care" id="acc-care-btn">
+              <span>Materials &amp; Care</span>
+              <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+            <div class="accordion-body" id="acc-care" role="region" aria-labelledby="acc-care-btn">
+              <div class="accordion-body-inner">
+                <ul>
+                  <li>100% premium felt backing (navy, 2mm thickness)</li>
+                  <li>12-weight rayon embroidery thread — colourfast &amp; fade-resistant</li>
+                  <li>Iron-on heat-activated adhesive pre-applied</li>
+                  <li>Machine washable — turn garment inside out, cold wash gentle cycle</li>
+                  <li>Do not tumble dry or iron directly over patch after application</li>
+                  <li>For extra hold: sew around the border after ironing</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Item 3 — Shipping Info -->
+          <div class="accordion-item">
+            <button class="accordion-trigger" aria-expanded="false" aria-controls="acc-ship" id="acc-ship-btn">
+              <span>Shipping Info</span>
+              <svg class="icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+              </svg>
+            </button>
+            <div class="accordion-body" id="acc-ship" role="region" aria-labelledby="acc-ship-btn">
+              <div class="accordion-body-inner">
+                <ul>
+                  <li><strong style="color:rgba(255,255,255,0.65)">Standard:</strong> 3–5 business days — $4.99 (free over $50)</li>
+                  <li><strong style="color:rgba(255,255,255,0.65)">Express:</strong> 1–2 business days — $12.99</li>
+                  <li><strong style="color:rgba(255,255,255,0.65)">International:</strong> 7–14 business days — rates at checkout</li>
+                  <li>Orders ship Monday–Friday. Same-day dispatch for orders placed before 12pm EST.</li>
+                  <li>Tracking provided for all orders via email confirmation.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /accordion -->
+
+      </div><!-- /right column -->
+
+    </div><!-- /grid -->
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     YOU MAY ALSO LIKE
+═══════════════════════════════════════════════ -->
+<section class="bg-black border-t border-[rgba(255,255,255,0.06)]" aria-label="You may also like">
+  <div class="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-10 py-14">
+
+    <div class="flex items-end justify-between mb-8 gap-4">
+      <div>
+        <span class="section-label block mb-2">hand-picked</span>
+        <h2 class="font-heading text-white text-2xl md:text-3xl">You May Also Like</h2>
+      </div>
+      <a href="/shop" class="font-body text-white/30 text-xs hover:text-white/60 transition-colors cursor-pointer tracking-wide flex-shrink-0">
+        View all →
+      </a>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+
+      <!-- Card A — Moon Phase Set -->
+      <article class="product-card" aria-label="Moon Phase Set">
+        <div class="card-img">
+          <div class="absolute top-2 left-0 z-10"><span class="badge badge-mystic">Mystic</span></div>
+          <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;background:#0D0D0D">
+            <rect x="40" y="40" width="320" height="320" rx="60" fill="#080415" stroke="#F5C842" stroke-width="5"/>
+            <!-- Three moon phases -->
+            <g transform="translate(95,200)">
+              <circle r="42" fill="#1A0A2E" stroke="#F5C842" stroke-width="2"/>
+              <path d="M0 -42 A42 42 0 1 0 0 42 A28 28 0 1 1 0 -42Z" fill="#FFE580"/>
+            </g>
+            <g transform="translate(200,200)">
+              <circle r="42" fill="#F5C842" stroke="#FFE580" stroke-width="2"/>
+              <circle cx="-10" cy="-8" r="6" fill="rgba(0,0,0,0.08)"/>
+              <circle cx="8" cy="12" r="4" fill="rgba(0,0,0,0.06)"/>
+            </g>
+            <g transform="translate(305,200)">
+              <circle r="42" fill="#1A0A2E" stroke="#F5C842" stroke-width="2"/>
+              <path d="M0 -42 A28 28 0 1 1 0 42 A42 42 0 1 1 0 -42Z" fill="#FFE580"/>
+            </g>
+            <polygon points="200,88 202,95 209,95 203,99 205,106 200,102 195,106 197,99 191,95 198,95" fill="#FFE580" opacity=".7"/>
+            <circle cx="140" cy="100" r="2.5" fill="#9D4EDD" opacity=".8"/>
+            <circle cx="260" cy="95" r="2" fill="#FF9FF3" opacity=".7"/>
+            <rect x="40" y="40" width="320" height="320" rx="60" fill="none" stroke="#F5C842" stroke-width="2" stroke-dasharray="3 7" opacity=".4"/>
+          </svg>
+          <div class="card-glow"></div>
+          <button class="quick-add" aria-label="Quick add Moon Phase Set to cart">+ Add to Cart</button>
+        </div>
+        <div class="card-info">
+          <div class="star-row" aria-label="4.9 stars">
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <span class="font-body text-white/30 text-[10px] ml-1">(189)</span>
+          </div>
+          <p class="card-name mt-1">Moon Phase Set</p>
+          <p class="card-sub">3-pack · iron-on</p>
+          <p class="card-price">$24.99</p>
+        </div>
+      </article>
+
+      <!-- Card B — Shooting Star -->
+      <article class="product-card" aria-label="Shooting Star Patch">
+        <div class="card-img">
+          <div class="absolute top-2 left-0 z-10"><span class="badge badge-new">New</span></div>
+          <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;background:#0D0D0D">
+            <rect x="40" y="40" width="320" height="320" rx="60" fill="#08040F" stroke="#F5C842" stroke-width="6"/>
+            <path d="M100 280 Q160 240 230 160" stroke="url(#tr2)" stroke-width="18" fill="none" stroke-linecap="round" opacity=".35"/>
+            <path d="M110 290 Q165 248 235 168" stroke="url(#tr2)" stroke-width="9"  fill="none" stroke-linecap="round" opacity=".55"/>
+            <path d="M120 300 Q170 256 240 176" stroke="url(#tr2)" stroke-width="4"  fill="none" stroke-linecap="round" opacity=".85"/>
+            <polygon points="245,155 250,172 267,172 254,182 259,199 245,189 231,199 236,182 223,172 240,172" fill="#F5C842"/>
+            <polygon points="245,162 248,173 259,173 251,179 254,190 245,184 236,190 239,179 231,173 242,173" fill="#FFE580"/>
+            <circle cx="135" cy="272" r="4"   fill="#FFE580" opacity=".9"/>
+            <circle cx="183" cy="220" r="2"   fill="#FFE580" opacity=".6"/>
+            <circle cx="100" cy="110" r="2.5" fill="#fff"    opacity=".4"/>
+            <circle cx="290" cy="130" r="2"   fill="#9D4EDD" opacity=".6"/>
+            <circle cx="310" cy="200" r="2"   fill="#FF9FF3" opacity=".5"/>
+            <polygon points="310,280 312,286 318,286 313,290 315,296 310,292 305,296 307,290 302,286 308,286" fill="#FFE580" opacity=".4"/>
+            <rect x="40" y="40" width="320" height="320" rx="60" fill="none" stroke="#F5C842" stroke-width="2" stroke-dasharray="4 6" opacity=".35"/>
+            <defs>
+              <linearGradient id="tr2" x1="100" y1="280" x2="240" y2="160">
+                <stop offset="0%"   stop-color="transparent"/>
+                <stop offset="100%" stop-color="#F5C842"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="card-glow" style="background:radial-gradient(circle at 50% 80%,rgba(245,200,66,0.25) 0%,transparent 65%)"></div>
+          <button class="quick-add" aria-label="Quick add Shooting Star Patch to cart">+ Add to Cart</button>
+        </div>
+        <div class="card-info">
+          <div class="star-row" aria-label="4.9 stars">
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <span class="font-body text-white/30 text-[10px] ml-1">(103)</span>
+          </div>
+          <p class="card-name mt-1">Shooting Star Patch</p>
+          <p class="card-sub">Embroidered · 3.5"</p>
+          <p class="card-price">$10.99</p>
+        </div>
+      </article>
+
+      <!-- Card C — Enchanted Rose -->
+      <article class="product-card" aria-label="Enchanted Rose Patch">
+        <div class="card-img">
+          <div class="absolute top-2 left-0 z-10"><span class="badge badge-mystic">Custom</span></div>
+          <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;background:#0D0D0D">
+            <rect x="40" y="40" width="320" height="320" rx="60" fill="#0A0515" stroke="#9D4EDD" stroke-width="6"/>
+            <path d="M200 310 Q190 260 200 220" stroke="#2D5A27" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <path d="M200 270 Q170 250 160 260 Q168 275 200 270Z" fill="#2D5A27" stroke="#3A7A34" stroke-width="1.5"/>
+            <path d="M200 255 Q230 235 240 245 Q232 260 200 255Z" fill="#2D5A27" stroke="#3A7A34" stroke-width="1.5"/>
+            <ellipse cx="200" cy="195" rx="28" ry="20" fill="#FF6EB4" transform="rotate(-20 200 195)"/>
+            <ellipse cx="200" cy="195" rx="28" ry="20" fill="#FF6EB4" transform="rotate(20 200 195)"/>
+            <ellipse cx="200" cy="185" rx="22" ry="18" fill="#FF6EB4" transform="rotate(-10 200 185)"/>
+            <ellipse cx="200" cy="185" rx="22" ry="18" fill="#FF6EB4" transform="rotate(10 200 185)"/>
+            <ellipse cx="200" cy="185" rx="18" ry="14" fill="#FF9FF3"/>
+            <ellipse cx="200" cy="182" rx="18" ry="14" fill="#FF9FF3" transform="rotate(15 200 182)"/>
+            <ellipse cx="200" cy="180" rx="11" ry="9"  fill="#FF6EB4"/>
+            <ellipse cx="200" cy="178" rx="7"  ry="6"  fill="#FFB3D9"/>
+            <polygon points="155,155 157,162 164,162 158,167 160,174 155,170 150,174 152,167 146,162 153,162" fill="#F5C842" opacity=".7"/>
+            <circle cx="250" cy="235" r="2"   fill="#FF9FF3" opacity=".6"/>
+            <circle cx="130" cy="185" r="2.5" fill="#F5C842"  opacity=".5"/>
+            <rect x="40" y="40" width="320" height="320" rx="60" fill="none" stroke="#7B2FBE" stroke-width="2" stroke-dasharray="4 6" opacity=".4"/>
+          </svg>
+          <div class="card-glow" style="background:radial-gradient(circle at 50% 80%,rgba(255,110,180,0.28) 0%,transparent 65%)"></div>
+          <button class="quick-add" aria-label="Quick add Enchanted Rose to cart">+ Add to Cart</button>
+        </div>
+        <div class="card-info">
+          <div class="star-row" aria-label="4.8 stars">
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" opacity=".35" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <span class="font-body text-white/30 text-[10px] ml-1">(77)</span>
+          </div>
+          <p class="card-name mt-1">Enchanted Rose</p>
+          <p class="card-sub">Custom embroidered · 3"</p>
+          <p class="card-price">$16.99</p>
+        </div>
+      </article>
+
+      <!-- Card D — Cosmic Eye -->
+      <article class="product-card" aria-label="Cosmic Eye Patch">
+        <div class="card-img">
+          <div class="absolute top-2 left-0 z-10"><span class="badge badge-gold">Bestseller</span></div>
+          <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block;background:#0D0D0D">
+            <rect x="40" y="40" width="320" height="320" rx="60" fill="#060212" stroke="#7B2FBE" stroke-width="6"/>
+            <path d="M80 200 Q200 100 320 200 Q200 300 80 200Z" fill="#1A0A2E" stroke="#7B2FBE" stroke-width="3"/>
+            <circle cx="200" cy="200" r="62" fill="url(#iris2)"/>
+            <line x1="200" y1="138" x2="200" y2="262" stroke="rgba(157,78,221,0.3)" stroke-width="1"/>
+            <line x1="138" y1="200" x2="262" y2="200" stroke="rgba(157,78,221,0.3)" stroke-width="1"/>
+            <line x1="156" y1="156" x2="244" y2="244" stroke="rgba(157,78,221,0.3)" stroke-width="1"/>
+            <line x1="244" y1="156" x2="156" y2="244" stroke="rgba(157,78,221,0.3)" stroke-width="1"/>
+            <circle cx="200" cy="200" r="30" fill="#050010"/>
+            <circle cx="188" cy="188" r="9"  fill="rgba(255,255,255,0.22)"/>
+            <circle cx="185" cy="185" r="4"  fill="rgba(255,255,255,0.35)"/>
+            <line x1="200" y1="138" x2="200" y2="120" stroke="#9D4EDD" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="225" y1="143" x2="230" y2="126" stroke="#9D4EDD" stroke-width="2"   stroke-linecap="round"/>
+            <line x1="248" y1="158" x2="258" y2="144" stroke="#9D4EDD" stroke-width="2"   stroke-linecap="round"/>
+            <line x1="175" y1="143" x2="170" y2="126" stroke="#9D4EDD" stroke-width="2"   stroke-linecap="round"/>
+            <line x1="152" y1="158" x2="142" y2="144" stroke="#9D4EDD" stroke-width="2"   stroke-linecap="round"/>
+            <polygon points="120,100 122,107 129,107 123,111 125,118 120,114 115,118 117,111 111,107 118,107" fill="#F5C842" opacity=".6"/>
+            <circle cx="285" cy="110" r="3"   fill="#FF9FF3" opacity=".7"/>
+            <circle cx="300" cy="290" r="2.5" fill="#F5C842"  opacity=".5"/>
+            <rect x="40" y="40" width="320" height="320" rx="60" fill="none" stroke="#5B1A9A" stroke-width="2" stroke-dasharray="4 6" opacity=".4"/>
+            <defs>
+              <radialGradient id="iris2" cx="50%" cy="50%" r="50%">
+                <stop offset="0%"   stop-color="#9D4EDD"/>
+                <stop offset="45%"  stop-color="#7B2FBE"/>
+                <stop offset="100%" stop-color="#1A0A2E"/>
+              </radialGradient>
+            </defs>
+          </svg>
+          <div class="card-glow"></div>
+          <button class="quick-add" aria-label="Quick add Cosmic Eye Patch to cart">+ Add to Cart</button>
+        </div>
+        <div class="card-info">
+          <div class="star-row" aria-label="5 stars">
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+            <span class="font-body text-white/30 text-[10px] ml-1">(295)</span>
+          </div>
+          <p class="card-name mt-1">Cosmic Eye Patch</p>
+          <p class="card-sub">Embroidered · 3"</p>
+          <p class="card-price">$13.99</p>
+        </div>
+      </article>
+
+    </div><!-- /grid -->
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     REVIEWS
+═══════════════════════════════════════════════ -->
+<section id="reviews" class="bg-black border-t border-[rgba(255,255,255,0.06)]" aria-label="Customer reviews">
+  <div class="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-10 py-14">
+
+    <!-- Section header -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+      <div>
+        <span class="section-label block mb-2">the verdict</span>
+        <h2 class="font-heading text-white text-2xl md:text-3xl">Customer Reviews</h2>
+      </div>
+      <a href="#leave-review" class="btn-primary flex-shrink-0 self-start md:self-auto" style="padding:11px 24px;font-size:0.9rem">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Leave a Review
+      </a>
+    </div>
+
+    <!-- Overall rating display -->
+    <div class="flex flex-col sm:flex-row gap-8 md:gap-14 mb-10 pb-10 border-b border-[rgba(255,255,255,0.06)]">
+
+      <!-- Big number -->
+      <div class="flex flex-col items-center justify-center flex-shrink-0 gap-2">
+        <span class="font-display text-white leading-none" style="font-size:4.5rem;text-shadow:0 0 40px rgba(245,200,66,0.3)">4.9</span>
+        <div class="star-row" aria-label="4.9 out of 5 stars">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+        </div>
+        <p class="font-accent italic text-white/30 text-sm">312 reviews</p>
+      </div>
+
+      <!-- Rating breakdown bars -->
+      <div class="flex flex-col gap-2.5 flex-1 justify-center" aria-label="Rating breakdown">
+        <div class="flex items-center gap-3">
+          <span class="font-body text-white/35 text-xs w-4 text-right flex-shrink-0">5</span>
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="#F5C842" flex-shrink-0 aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <div class="flex-1 h-1.5 bg-[rgba(255,255,255,0.07)] rounded-full overflow-hidden">
+            <div class="h-full bg-gold rounded-full" style="width:88%"></div>
+          </div>
+          <span class="font-body text-white/30 text-xs w-6 flex-shrink-0">275</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="font-body text-white/35 text-xs w-4 text-right flex-shrink-0">4</span>
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <div class="flex-1 h-1.5 bg-[rgba(255,255,255,0.07)] rounded-full overflow-hidden">
+            <div class="h-full bg-gold rounded-full" style="width:9%"></div>
+          </div>
+          <span class="font-body text-white/30 text-xs w-6 flex-shrink-0">28</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="font-body text-white/35 text-xs w-4 text-right flex-shrink-0">3</span>
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <div class="flex-1 h-1.5 bg-[rgba(255,255,255,0.07)] rounded-full overflow-hidden">
+            <div class="h-full bg-gold rounded-full" style="width:2%"></div>
+          </div>
+          <span class="font-body text-white/30 text-xs w-6 flex-shrink-0">6</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="font-body text-white/35 text-xs w-4 text-right flex-shrink-0">2</span>
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <div class="flex-1 h-1.5 bg-[rgba(255,255,255,0.07)] rounded-full overflow-hidden">
+            <div class="h-full bg-gold rounded-full" style="width:1%"></div>
+          </div>
+          <span class="font-body text-white/30 text-xs w-6 flex-shrink-0">2</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="font-body text-white/35 text-xs w-4 text-right flex-shrink-0">1</span>
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <div class="flex-1 h-1.5 bg-[rgba(255,255,255,0.07)] rounded-full overflow-hidden">
+            <div class="h-full bg-gold rounded-full" style="width:0.5%"></div>
+          </div>
+          <span class="font-body text-white/30 text-xs w-6 flex-shrink-0">1</span>
+        </div>
+      </div>
+
+    </div><!-- /overall rating -->
+
+    <!-- Review cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+
+      <!-- Review 1 -->
+      <blockquote class="review-card flex flex-col gap-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center font-heading text-white text-sm flex-shrink-0"
+                 style="background:linear-gradient(135deg,#7B2FBE,#FF6EB4)" aria-hidden="true">SK</div>
+            <div>
+              <p class="font-heading text-white text-sm leading-none">Sophie K.</p>
+              <p class="font-accent italic text-white/30 text-[0.7rem] mt-0.5">London, UK</p>
+            </div>
+          </div>
+          <span class="badge badge-mystic" style="font-size:0.62rem">Verified</span>
+        </div>
+        <div class="star-row" aria-label="5 out of 5 stars">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+        </div>
+        <p class="font-body text-white/60 text-sm leading-relaxed flex-1">
+          "Absolutely stunning. The moon detail is so intricate — you can really see every thread. Ironed on perfectly first try, and it's been through four washes without budging. Ordered three more as gifts."
+        </p>
+        <footer class="flex items-center justify-between">
+          <time class="font-accent italic text-white/20 text-[0.7rem]" datetime="2026-03-14">March 14, 2026</time>
+          <button class="flex items-center gap-1.5 font-body text-white/20 text-[0.7rem] hover:text-white/45 transition-colors cursor-pointer" aria-label="Mark review as helpful">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            Helpful (24)
+          </button>
+        </footer>
+      </blockquote>
+
+      <!-- Review 2 -->
+      <blockquote class="review-card flex flex-col gap-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center font-heading text-white text-sm flex-shrink-0"
+                 style="background:linear-gradient(135deg,#9D4EDD,#F5C842)" aria-hidden="true">MR</div>
+            <div>
+              <p class="font-heading text-white text-sm leading-none">Margot R.</p>
+              <p class="font-accent italic text-white/30 text-[0.7rem] mt-0.5">New York, US</p>
+            </div>
+          </div>
+          <span class="badge badge-mystic" style="font-size:0.62rem">Verified</span>
+        </div>
+        <div class="star-row" aria-label="5 out of 5 stars">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+        </div>
+        <p class="font-body text-white/60 text-sm leading-relaxed flex-1">
+          "I bought the medium for my denim jacket and it looks like it was made for it. The colours photograph so well — got so many compliments at the festival. The packaging alone made me emotional, honestly."
+        </p>
+        <footer class="flex items-center justify-between">
+          <time class="font-accent italic text-white/20 text-[0.7rem]" datetime="2026-02-28">Feb 28, 2026</time>
+          <button class="flex items-center gap-1.5 font-body text-white/20 text-[0.7rem] hover:text-white/45 transition-colors cursor-pointer" aria-label="Mark review as helpful">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            Helpful (17)
+          </button>
+        </footer>
+      </blockquote>
+
+      <!-- Review 3 -->
+      <blockquote class="review-card flex flex-col gap-4">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center font-heading text-white text-sm flex-shrink-0"
+                 style="background:linear-gradient(135deg,#FF6EB4,#9D4EDD)" aria-hidden="true">TL</div>
+            <div>
+              <p class="font-heading text-white text-sm leading-none">Taylor L.</p>
+              <p class="font-accent italic text-white/30 text-[0.7rem] mt-0.5">Toronto, CA</p>
+            </div>
+          </div>
+          <span class="badge badge-mystic" style="font-size:0.62rem">Verified</span>
+        </div>
+        <div class="star-row" aria-label="4 out of 5 stars">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#F5C842" opacity=".25" aria-hidden="true"><path d="M8 0l1.5 5.5L15 8l-5.5 1.5L8 16l-1.5-5.5L1 8l5.5-1.5z"/></svg>
+        </div>
+        <p class="font-body text-white/60 text-sm leading-relaxed flex-1">
+          "Really lovely quality — the thread is thick and rich. Knocked one star only because the XL was a tiny bit smaller than I expected from the size guide, but the patch itself is gorgeous. Would absolutely order again."
+        </p>
+        <footer class="flex items-center justify-between">
+          <time class="font-accent italic text-white/20 text-[0.7rem]" datetime="2026-02-09">Feb 9, 2026</time>
+          <button class="flex items-center gap-1.5 font-body text-white/20 text-[0.7rem] hover:text-white/45 transition-colors cursor-pointer" aria-label="Mark review as helpful">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            Helpful (9)
+          </button>
+        </footer>
+      </blockquote>
+
+    </div><!-- /review cards -->
+
+    <!-- Leave a Review CTA -->
+    <div id="leave-review" class="flex flex-col sm:flex-row items-center justify-between gap-5 py-8 px-6 md:px-10"
+         style="background:#0A0A0A; border:1px solid rgba(123,47,190,0.18)">
+      <div>
+        <h3 class="font-heading text-white text-lg mb-0.5">Loved this patch?</h3>
+        <p class="font-accent italic text-white/30 text-sm">Share your experience and help fellow dreamers.</p>
+      </div>
+      <a href="/account/reviews/new?product=celestial-night-patch" class="btn-primary flex-shrink-0" style="padding:11px 28px;font-size:0.92rem">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Write a Review
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"></div>
+
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════ -->
+<footer class="bg-black" aria-label="Site footer">
+
+  <!-- Newsletter band -->
+  <div class="border-b border-[rgba(255,255,255,0.06)]">
+    <div class="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-10 py-10">
+      <div class="flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-12">
+        <div class="flex-shrink-0">
+          <h3 class="font-heading text-white text-xl mb-1">Join the Coven</h3>
+          <p class="font-accent italic text-white/35 text-sm">New drops, spells &amp; 10% off your first order</p>
+        </div>
+        <form class="flex gap-0 flex-1 w-full max-w-[440px]" action="/newsletter" method="post" aria-label="Newsletter signup">
+          <label for="nl-email" class="sr-only">Your email address</label>
+          <input id="nl-email" type="email" name="email" placeholder="your@email.com"
+                 required autocomplete="email" class="nl-input" style="border-right:none"/>
+          <button type="submit" class="btn-primary flex-shrink-0 text-sm px-5 py-3"
+                  style="border-radius:0 4px 4px 0;min-width:110px">Subscribe</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main links grid -->
+  <div class="max-w-[1200px] mx-auto px-4 md:px-6 lg:px-10 py-12">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10">
+
+      <!-- Brand -->
+      <div class="col-span-2 md:col-span-1">
+        <a href="/" class="flex items-center gap-2 mb-4 cursor-pointer" aria-label="Imagine Patch home">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <path d="M6 26 L20 6" stroke="#F5C842" stroke-width="2" stroke-linecap="round"/>
+            <polygon points="20,6 23,11 17,11" fill="#F5C842"/>
+            <path d="M4 22 Q16 6 28 22" stroke="url(#rn-ft)" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            <path d="M25 9 L26 7 L27 9 L29 10 L27 11 L26 13 L25 11 L23 10Z" fill="#9D4EDD"/>
+            <defs>
+              <linearGradient id="rn-ft" x1="4" y1="22" x2="28" y2="22">
+                <stop offset="0%"   stop-color="#FF6B6B"/>
+                <stop offset="50%"  stop-color="#FECA57"/>
+                <stop offset="100%" stop-color="#9D4EDD"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="font-display text-purple text-xl">Imagine Patch</span>
+        </a>
+        <p class="font-body text-white/35 text-xs leading-relaxed mb-5 max-w-[200px]">
+          Magical embroidered patches &amp; print-on-demand gifts for dreamers.
+        </p>
+        <div class="flex gap-2" aria-label="Social media links">
+          <a href="https://instagram.com/imaginepatch"
+             class="w-8 h-8 flex items-center justify-center border border-[rgba(255,255,255,0.1)] hover:border-[rgba(123,47,190,0.6)] hover:bg-[rgba(123,47,190,0.1)] transition-all cursor-pointer" aria-label="Instagram" style="border-radius:2px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </a>
+          <a href="https://tiktok.com/@imaginepatch"
+             class="w-8 h-8 flex items-center justify-center border border-[rgba(255,255,255,0.1)] hover:border-[rgba(123,47,190,0.6)] hover:bg-[rgba(123,47,190,0.1)] transition-all cursor-pointer" aria-label="TikTok" style="border-radius:2px">
+            <svg width="13" height="14" viewBox="0 0 15 17" fill="rgba(255,255,255,0.55)" aria-hidden="true"><path d="M11.5 0.5C11.7 2.3 12.8 3.7 14.5 4.1v2.5c-1.2-.1-2.3-.5-3.2-1.1v5.2c0 2.8-2.2 5-5 5s-5-2.2-5-5 2.2-5 5-5c.2 0 .4 0 .5.1v2.5c-.2 0-.4-.1-.5-.1-1.4 0-2.5 1.1-2.5 2.5s1.1 2.5 2.5 2.5 2.5-1.1 2.5-2.5V.5h2.2z"/></svg>
+          </a>
+          <a href="https://pinterest.com/imaginepatch"
+             class="w-8 h-8 flex items-center justify-center border border-[rgba(255,255,255,0.1)] hover:border-[rgba(123,47,190,0.6)] hover:bg-[rgba(123,47,190,0.1)] transition-all cursor-pointer" aria-label="Pinterest" style="border-radius:2px">
+            <svg width="13" height="14" viewBox="0 0 14 16" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><path d="M7 1C3.7 1 1 3.7 1 7c0 2.6 1.6 4.9 3.8 5.9 0-.5 0-1 .1-1.4l.8-3.5s-.2-.5-.2-1.1c0-1 .6-1.8 1.4-1.8.6 0 .9.5.9 1 0 .6-.4 1.5-.6 2.4-.2.7.4 1.3 1.1 1.3 1.3 0 2.2-1.6 2.2-3.6 0-1.5-1-2.6-2.6-2.6-1.8 0-2.8 1.3-2.8 2.7 0 .5.2 1 .5 1.3"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Shop -->
+      <div>
+        <h4 class="font-heading text-white text-sm mb-4 tracking-wide">Shop</h4>
+        <ul class="flex flex-col gap-2.5">
+          <li><a href="/shop"                  class="section-label cursor-pointer">All Products</a></li>
+          <li><a href="/collections/celestial" class="section-label cursor-pointer">Celestial &amp; Mystic</a></li>
+          <li><a href="/collections/y2k"       class="section-label cursor-pointer">Y2K Magical</a></li>
+          <li><a href="/custom"                class="section-label cursor-pointer">Custom Patches</a></li>
+          <li><a href="/gift-sets"             class="section-label cursor-pointer">Gift Sets</a></li>
+          <li><a href="/sale"                  class="font-body text-pink text-xs hover:text-pink-lt transition-colors cursor-pointer tracking-wide">Sale</a></li>
+        </ul>
+      </div>
+
+      <!-- Help -->
+      <div>
+        <h4 class="font-heading text-white text-sm mb-4 tracking-wide">Help</h4>
+        <ul class="flex flex-col gap-2.5">
+          <li><a href="/faq"          class="section-label cursor-pointer">FAQ</a></li>
+          <li><a href="/shipping"     class="section-label cursor-pointer">Shipping &amp; Returns</a></li>
+          <li><a href="/custom-guide" class="section-label cursor-pointer">Custom Order Guide</a></li>
+          <li><a href="/care"         class="section-label cursor-pointer">Patch Care</a></li>
+          <li><a href="/contact"      class="section-label cursor-pointer">Contact Us</a></li>
+          <li><a href="/wholesale"    class="section-label cursor-pointer">Wholesale</a></li>
+        </ul>
+      </div>
+
+      <!-- About -->
+      <div>
+        <h4 class="font-heading text-white text-sm mb-4 tracking-wide">About</h4>
+        <ul class="flex flex-col gap-2.5">
+          <li><a href="/about"          class="section-label cursor-pointer">Our Story</a></li>
+          <li><a href="/sustainability" class="section-label cursor-pointer">Sustainability</a></li>
+          <li><a href="/blog"           class="section-label cursor-pointer">The Spellbook (Blog)</a></li>
+          <li><a href="/affiliates"     class="section-label cursor-pointer">Affiliates</a></li>
+          <li><a href="/press"          class="section-label cursor-pointer">Press &amp; Media</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- Moon phases row -->
+    <div class="flex justify-center gap-4 my-10 opacity-[0.12]" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFE580"><path d="M3 12.79A9 9 0 1 0 12.79 3 7 7 0 0 1 3 12.79z"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFE580"><path d="M12 3Q8.5 12 12 21Q4 17 4 12Q4 7 12 3Z"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFE580"><path d="M12 3Q9.5 7 9.5 12Q9.5 17 12 21Q5 17 5 12Q5 7 12 3Z"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFE580"><circle cx="12" cy="12" r="7"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFE580"><path d="M12 3Q14.5 7 14.5 12Q14.5 17 12 21Q19 17 19 12Q19 7 12 3Z"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFE580"><path d="M12 3Q15.5 12 12 21Q20 17 20 12Q20 7 12 3Z"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFE580"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="border-t border-[rgba(255,255,255,0.05)] pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="font-body text-white/20 text-[11px] text-center sm:text-left tracking-wide">
+        &copy; 2026 Imagine Patch. All rights reserved. Made with
+        <svg class="inline w-3 h-3 mx-0.5 mb-0.5" viewBox="0 0 24 24" fill="#FF6EB4" aria-label="love"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        magic.
+      </p>
+      <div class="flex gap-5">
+        <a href="/privacy" class="font-body text-white/20 text-[11px] hover:text-white/50 transition-colors cursor-pointer tracking-wide">Privacy</a>
+        <a href="/terms"   class="font-body text-white/20 text-[11px] hover:text-white/50 transition-colors cursor-pointer tracking-wide">Terms</a>
+        <a href="/cookies" class="font-body text-white/20 text-[11px] hover:text-white/50 transition-colors cursor-pointer tracking-wide">Cookies</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════ -->
+<script>
+  /* ── Announcement bar dismiss ── */
+  const bar     = document.getElementById('announcement-bar');
+  const dismiss = document.getElementById('dismiss-bar');
+  if (bar && dismiss) {
+    dismiss.addEventListener('click', () => {
+      bar.classList.add('dismissed');
+      bar.addEventListener('transitionend', () => bar.remove(), { once: true });
+      document.getElementById('site-header').style.top = '0';
+    });
+  }
+
+  /* ── Mobile nav toggle ── */
+  const toggle    = document.getElementById('menu-toggle');
+  const mobileNav = document.getElementById('mobile-nav');
+  const iconOpen  = document.getElementById('menu-icon-open');
+  const iconClose = document.getElementById('menu-icon-close');
+  if (toggle && mobileNav) {
+    toggle.addEventListener('click', () => {
+      const isOpen = mobileNav.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', isOpen);
+      iconOpen?.classList.toggle('hidden', isOpen);
+      iconClose?.classList.toggle('hidden', !isOpen);
+    });
+    document.addEventListener('click', (e) => {
+      if (!toggle.contains(e.target) && !mobileNav.contains(e.target)) {
+        mobileNav.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+        iconOpen?.classList.remove('hidden');
+        iconClose?.classList.add('hidden');
+      }
+    });
+  }
+
+  /* ── Scroll: header border ── */
+  const header = document.getElementById('site-header');
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        header.style.borderBottomColor = window.scrollY > 40
+          ? 'rgba(123,47,190,0.25)'
+          : 'rgba(255,255,255,0.07)';
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  /* ── Image gallery — thumbnail switching ── */
+  const thumbBtns = document.querySelectorAll('.thumb');
+  const mainSvg   = document.getElementById('img-1');
+  // Subtle CSS filter per view to simulate different angles/lighting
+  const viewFilters = [
+    'none',
+    'brightness(1.12) contrast(1.05) saturate(0.85)',
+    'brightness(0.82) contrast(1.12) hue-rotate(5deg)',
+    'sepia(0.18) brightness(1.04) contrast(0.95)',
+  ];
+  thumbBtns.forEach((btn, i) => {
+    btn.addEventListener('click', () => {
+      thumbBtns.forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+      if (mainSvg) mainSvg.style.filter = viewFilters[i] ?? 'none';
+    });
+  });
+
+  /* ── Variant pills ── */
+  const variantPills = document.querySelectorAll('.variant-pill');
+  variantPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      variantPills.forEach(p => { p.classList.remove('active'); p.setAttribute('aria-pressed', 'false'); });
+      pill.classList.add('active');
+      pill.setAttribute('aria-pressed', 'true');
+    });
+  });
+
+  /* ── Quantity stepper ── */
+  let qty = 1;
+  const qtyDisplay = document.getElementById('qty-value');
+  const qtyMinus   = document.getElementById('qty-minus');
+  const qtyPlus    = document.getElementById('qty-plus');
+  function updateQty(n) {
+    qty = Math.max(1, Math.min(99, n));
+    if (qtyDisplay) qtyDisplay.textContent = qty;
+    if (qtyMinus) qtyMinus.style.opacity = qty <= 1 ? '0.35' : '1';
+  }
+  qtyMinus?.addEventListener('click', () => updateQty(qty - 1));
+  qtyPlus?.addEventListener('click',  () => updateQty(qty + 1));
+
+  /* ── Add to cart feedback ── */
+  const addBtn = document.getElementById('add-to-cart');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      const orig = addBtn.innerHTML;
+      addBtn.disabled = true;
+      addBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Added to Cart!`;
+      addBtn.style.background = '#5B1A9A';
+      setTimeout(() => {
+        addBtn.innerHTML = orig;
+        addBtn.style.background = '';
+        addBtn.disabled = false;
+      }, 2000);
+    });
+  }
+
+  /* ── Wishlist toggle ── */
+  const wishlistBtn = document.getElementById('product-wishlist');
+  const wishlistLbl = document.getElementById('wishlist-label');
+  if (wishlistBtn) {
+    let wishlisted = false;
+    wishlistBtn.addEventListener('click', () => {
+      wishlisted = !wishlisted;
+      const path = wishlistBtn.querySelector('path');
+      if (path) {
+        path.setAttribute('fill',   wishlisted ? '#FF6EB4' : 'none');
+        path.setAttribute('stroke', wishlisted ? '#FF6EB4' : 'currentColor');
+      }
+      if (wishlistLbl) wishlistLbl.textContent = wishlisted ? 'Saved to Wishlist' : 'Save to Wishlist';
+      wishlistBtn.style.color = wishlisted ? '#FF6EB4' : '';
+    });
+  }
+
+  /* ── Accordion ── */
+  document.querySelectorAll('.accordion-trigger').forEach(trigger => {
+    trigger.addEventListener('click', () => {
+      const expanded = trigger.getAttribute('aria-expanded') === 'true';
+      const bodyId   = trigger.getAttribute('aria-controls');
+      const body     = document.getElementById(bodyId);
+
+      // Close all first
+      document.querySelectorAll('.accordion-trigger').forEach(t => {
+        t.setAttribute('aria-expanded', 'false');
+      });
+      document.querySelectorAll('.accordion-body').forEach(b => {
+        b.classList.remove('open');
+      });
+
+      // Open clicked if it was closed
+      if (!expanded && body) {
+        trigger.setAttribute('aria-expanded', 'true');
+        body.classList.add('open');
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
+
+
