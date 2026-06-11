@@ -293,5 +293,74 @@ Elementor's visual editor allows Angie to manage page content independently
 without code changes, which is a requirement given the division of
 responsibilities on this project.
 
+---
+
+## ADR-010 — Stability, Monitoring, and Security Hardening (Phase 1)
+
+**Date:** 2026-05-23
+**Status:** Accepted
+
+**Context:**
+Following two 522 incidents caused by the Lightsail instance becoming
+unresponsive, a stability investigation was conducted. Additionally,
+Jetpack was removed during plugin cleanup, leaving a gap in brute force
+login protection. Several Cloudflare security improvements were also
+identified and addressed.
+
+**Decisions made:**
+
+**1. Swap file added (1GB)**
+The Lightsail instance had no swap configured. Apache prefork + MariaDB
+can exhaust available RAM during kernel maintenance reboots, causing the
+instance to become unresponsive. A 1GB swap file was added and persisted
+via /etc/fstab as a safety net.
+
+**2. Apache MPM prefork tuned**
+Default prefork configuration allowed up to 150 worker processes. At
+~140MB per worker this could consume all available RAM. Workers were
+reduced to MaxRequestWorkers 8, StartServers 2, MinSpareServers 2,
+MaxSpareServers 4, MaxConnectionsPerChild 1000. Active workers dropped
+from 11 to 3, freeing ~1GB of RAM.
+
+**3. UptimeRobot monitoring**
+External uptime monitoring configured via UptimeRobot. Alerts sent via
+email on 522/downtime events. This provided visibility into the second
+522 incident which lasted 13 hours before detection.
+
+**4. Brute force login protection via Cloudflare WAF**
+Jetpack was removed during plugin cleanup. Jetpack had blocked 11,793
+brute force login attempts. Two Cloudflare WAF rules were created to
+replace this protection:
+- Custom rule: Managed Challenge on /wp-login.php (blocks bots at edge)
+- Rate limiting rule: Block IPs exceeding 5 requests to /wp-login.php
+  in 10 seconds
+
+**5. Cloudflare security improvements**
+- Block AI Bots enabled (all pages) — prevents AI training crawlers
+  from scraping product images and content
+- Bot Fight Mode confirmed active with JS Detections
+- MFA enabled on Cloudflare account (Microsoft Authenticator, TOTP)
+- DMARC record added to DNS
+
+**6. SSH access**
+SSH access restricted to home IP only via Lightsail firewall console.
+Managed manually due to Lightsail Terraform import limitation
+(documented in main.tf comments).
+
+**Root cause of 522 incidents:**
+AWS Lightsail performs automatic kernel maintenance that reboots the
+instance. Without swap, Apache workers consuming ~1.4GB RAM left
+insufficient memory during boot, causing the instance to become
+unresponsive to Cloudflare connection attempts. Swap + MPM tuning
+resolved this permanently.
+
+**Lessons learned:**
+- Always configure swap on small instances before go-live
+- Apache prefork default settings are dangerously high for 2GB instances
+- External monitoring (UptimeRobot) is essential — second incident ran
+  13 hours undetected without it
+- Removing security plugins requires immediate replacement of their
+  protective functions
+
 *New decisions will be added to this file as the project evolves.*
 *Format: ADR-XXX — short title, date, status, context, options, decision, reasoning.*
