@@ -362,5 +362,77 @@ resolved this permanently.
 - Removing security plugins requires immediate replacement of their
   protective functions
 
+---
+
+## ADR-011 — HTTPS Enforcement and WordPress Hardening (Phase 1)
+
+**Date:** 2026-06-13
+**Status:** Accepted
+
+**Context:**
+With core infrastructure stable (ADR-010), the pre-launch security
+hardening pass was carried out: enforcing HTTPS end-to-end, hardening
+WordPress against common attack vectors, fixing unreliable cron
+execution, and resolving an outstanding MariaDB warning.
+
+**Decisions made:**
+
+**1. End-to-end HTTPS enforcement**
+- Certbot (Let's Encrypt) installed on Apache, certificate issued for
+  imaginepatch.com and www.imaginepatch.com (expires 2026-09-09,
+  auto-renews via systemd timer)
+- Apache ServerName/ServerAlias added to 000-default.conf to allow
+  certificate installation
+- Cloudflare SSL/TLS mode upgraded from Full to Full (Strict)
+- Cloudflare "Always Use HTTPS" enabled
+- Cloudflare HSTS enabled: max-age 6 months, includeSubDomains, No-Sniff
+  header on, Preload off (deliberately — hard to reverse)
+- wp-config.php WP_HOME / WP_SITEURL hardcoded to https://imaginepatch.com/
+
+**2. security.txt**
+Added at /.well-known/security.txt per RFC 9116, pointing to
+magic@imaginepatch.com for vulnerability disclosure.
+
+**3. WordPress hardening**
+- DISALLOW_FILE_EDIT enabled (blocks theme/plugin editing via wp-admin)
+- XML-RPC blocked at the Apache level (.htaccess deny on xmlrpc.php) —
+  verified no impact on Stripe/Printful integrations
+- Directory browsing disabled (Options -Indexes in .htaccess)
+- Limit Login Attempts Reloaded installed (local/free mode only, no
+  cloud threat-sharing) as an additional layer beneath the Cloudflare
+  WAF rules from ADR-010; lockout notifications to magic@imaginepatch.com
+
+**4. WP-Cron reliability fix**
+WooCommerce/Stripe background tasks (cache prefetch, cleanup, scheduled
+sales, etc.) were piling up as "past-due" — 21 actions found pending.
+Root cause: WP's pseudo-cron only fires on page visits, insufficient
+for low-traffic pre-launch site.
+- DISABLE_WP_CRON set to true in wp-config.php
+- Real system cron added (*/5 * * * *) running
+  `wp cron event run --due-now` via wp-cli
+
+**5. MariaDB "username_here" warning — investigated, resolved as benign**
+Recurring "Access denied for user 'username_here'@'localhost'" warnings
+(multi-day intervals since April) were traced to the AWS Systems
+Manager (SSM) agent's health check process
+(/var/lib/amazon/ssm/.../healthcheck). Confirmed as failed connection
+attempts only, AWS-managed, no actual database access — no remediation
+needed.
+
+**Lessons learned:**
+- Apache vhosts need an explicit ServerName before Certbot can install
+  certificates non-interactively
+- Always verify XML-RPC blocking doesn't break payment gateway webhooks
+  before relying on it
+- WP-Cron's reliance on page traffic makes it unsuitable for low-traffic
+  pre-launch sites — real system cron is required regardless of traffic
+- Not every odd log warning is a security issue — AWS infrastructure
+  agents can produce noise that should be investigated but not
+  over-engineered around
+
+---
+
+
+
 *New decisions will be added to this file as the project evolves.*
 *Format: ADR-XXX — short title, date, status, context, options, decision, reasoning.*
