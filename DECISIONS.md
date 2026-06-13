@@ -432,7 +432,72 @@ needed.
 
 ---
 
+## ADR-012 — IAM Security Review (Phase 1)
 
+**Date:** 2026-06-13
+**Status:** Accepted
 
+**Context:**
+As the final item of the pre-launch security hardening pass, the IAM
+structure defined in ADR-005/ADR-007 was audited against its actual
+state using a custom boto3 script (iam_audit.py), run locally with the
+juan-admin profile (not via SSH, to avoid placing admin credentials on
+a public-facing server).
+
+**Findings:**
+- All 6 IAM groups from ADR-005 exist with policies attached, confirming
+  structure intent was implemented correctly
+- Naming inconsistency: ADR-005 documents "imaginepatch-read-only";
+  actual group is "imaginepatch-readonly" (cosmetic, no action required)
+- No account-wide password policy was set (AWS defaults only)
+- Of 7 console-enabled users, only juan-admin had MFA configured —
+  6 users (including angie-imaginepatch and 5 placeholder accounts for
+  future team members) had console access with no MFA
+- Two active access keys approaching/past 90-day rotation guidance:
+  imaginepatch-terraform (81 days, unused since 2026-04-08) and
+  juan-admin (66 days)
+- Root account correctly absent from IAM user list, confirming ADR-006
+  compliance
+- IAMUserChangePassword policy present on all users — confirmed as AWS
+  default behavior, not a finding
+
+**Decisions made:**
+
+**1. MFA enforcement policy**
+Created customer-managed policy "imaginepatch-require-mfa-policy"
+implementing AWS's standard deny-all-except-self-service-unless-MFA
+pattern. Applied via new group "imaginepatch-require-mfa" containing
+all 7 console users (angie-imaginepatch, auditor-02, designer-02,
+dev-02, finance-02, juan-admin, store-manager-02).
+imaginepatch-terraform (programmatic service account, no console
+access) deliberately excluded — the policy would break Terraform CLI
+access for a non-MFA service account.
+
+Effect: the 6 previously-unprotected accounts are now locked to
+self-service MFA setup only until a device is registered. This was
+applied proactively — these accounts (aside from Angie's) are not yet
+in active use, so enforcement now means MFA is mandatory from first
+login when the team grows post-launch.
+
+**2. Account password policy**
+Set via IAM → Account settings: 14-character minimum, requires
+uppercase/lowercase/number/symbol, 90-day expiration, 5-password reuse
+prevention, self-service password changes allowed.
+
+**3. Access key rotation — deferred**
+Both active keys (imaginepatch-terraform and juan-admin) are
+approaching the 90-day rotation guideline. Rotation deferred to the
+next active Terraform session rather than performed in isolation.
+Tracked as an open item for follow-up.
+
+**Lessons learned:**
+- Auditing infrastructure against documented intent (ADRs) requires the
+  documentation to be the source of truth — without it, an audit can
+  only describe current state, not whether it's correct
+- AWS CloudShell or a local admin profile is preferable to SSH for IAM
+  auditing — credentials for account-wide operations should not live on
+  internet-facing servers
+- Enforcing MFA via group policy before accounts are actively used is
+  cheaper than retrofitting it after onboarding real users
 *New decisions will be added to this file as the project evolves.*
 *Format: ADR-XXX — short title, date, status, context, options, decision, reasoning.*
