@@ -499,5 +499,6 @@ Tracked as an open item for follow-up.
   internet-facing servers
 - Enforcing MFA via group policy before accounts are actively used is
   cheaper than retrofitting it after onboarding real users
+  
 *New decisions will be added to this file as the project evolves.*
 *Format: ADR-XXX — short title, date, status, context, options, decision, reasoning.*
