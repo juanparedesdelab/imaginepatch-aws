@@ -358,3 +358,111 @@ resource "aws_iam_user_group_membership" "juan_admin" {
   user   = aws_iam_user.juan_admin.name
   groups = [aws_iam_group.admins.name]
 }
+
+# ── MFA ENFORCEMENT POLICY ────────────────────────────────────────────────────
+resource "aws_iam_policy" "require_mfa" {
+  name = "imaginepatch-require-mfa-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowViewAccountInfo"
+        Effect = "Allow"
+        Action = [
+          "iam:GetAccountPasswordPolicy",
+          "iam:GetAccountSummary",
+          "iam:ListVirtualMFADevices"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "AllowManageOwnPasswords"
+        Effect = "Allow"
+        Action = [
+          "iam:ChangePassword",
+          "iam:GetUser"
+        ]
+        Resource = "arn:aws:iam::*:user/$${aws:username}"
+      },
+      {
+        Sid    = "AllowManageOwnVirtualMFADevice"
+        Effect = "Allow"
+        Action = [
+          "iam:CreateVirtualMFADevice",
+          "iam:DeleteVirtualMFADevice"
+        ]
+        Resource = "arn:aws:iam::*:mfa/$${aws:username}"
+      },
+      {
+        Sid    = "AllowManageOwnUserMFA"
+        Effect = "Allow"
+        Action = [
+          "iam:DeactivateMFADevice",
+          "iam:EnableMFADevice",
+          "iam:ListMFADevices",
+          "iam:ResyncMFADevice"
+        ]
+        Resource = "arn:aws:iam::*:user/$${aws:username}"
+      },
+      {
+        Sid    = "DenyAllExceptListedIfNoMFA"
+        Effect = "Deny"
+        NotAction = [
+          "iam:CreateVirtualMFADevice",
+          "iam:EnableMFADevice",
+          "iam:GetUser",
+          "iam:ListMFADevices",
+          "iam:ListVirtualMFADevices",
+          "iam:ResyncMFADevice",
+          "iam:ChangePassword",
+          "iam:GetAccountPasswordPolicy",
+          "sts:GetSessionToken"
+        ]
+        Resource = "*"
+        Condition = {
+          BoolIfExists = {
+            "aws:MultiFactorAuthPresent" = "false"
+          }
+        }
+      }
+    ]
+  })
+}
+
+# ── MFA ENFORCEMENT GROUP ─────────────────────────────────────────────────────
+resource "aws_iam_group" "require_mfa" {
+  name = "imaginepatch-require-mfa"
+}
+
+resource "aws_iam_group_policy_attachment" "require_mfa" {
+  group      = aws_iam_group.require_mfa.name
+  policy_arn = aws_iam_policy.require_mfa.arn
+}
+
+resource "aws_iam_group_membership" "require_mfa" {
+  name  = "imaginepatch-require-mfa-membership"
+  group = aws_iam_group.require_mfa.name
+  users = [
+    "angie-imaginepatch",
+    "auditor-02",
+    "designer-02",
+    "dev-02",
+    "finance-02",
+    "juan-admin",
+    "store-manager-02",
+  ]
+}
+
+# ── ACCOUNT PASSWORD POLICY ───────────────────────────────────────────────────
+resource "aws_iam_account_password_policy" "imaginepatch" {
+  minimum_password_length        = 14
+  require_symbols                = true
+  require_numbers                = true
+  require_uppercase_characters   = true
+  require_lowercase_characters   = true
+  allow_users_to_change_password = true
+  max_password_age               = 90
+  password_reuse_prevention      = 5
+  hard_expiry                    = false
+}
