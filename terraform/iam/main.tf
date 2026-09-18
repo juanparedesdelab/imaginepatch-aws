@@ -46,6 +46,12 @@ resource "aws_iam_policy" "developer" {
         Effect   = "Allow"
         Action   = ["iam:Get*", "iam:List*"]
         Resource = "*"
+      },
+      {
+        Sid      = "CloudTrailReadOnly"
+        Effect   = "Allow"
+        Action   = ["cloudtrail:Describe*", "cloudtrail:Get*", "cloudtrail:List*"]
+        Resource = "*"
       }
     ]
   })
