@@ -27,3 +27,5 @@ node_modules/
 .env.local
 # SSH keys
 *.pem
+
+firewall-ports.json
