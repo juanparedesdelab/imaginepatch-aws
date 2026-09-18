@@ -500,5 +500,45 @@ Tracked as an open item for follow-up.
 - Enforcing MFA via group policy before accounts are actively used is
   cheaper than retrofitting it after onboarding real users
   
+## ADR-013 — Origin IP Lockdown: Lightsail firewall restricted to Cloudflare
+
+**Date:** 2026-09-17 
+**Status:** Accepted
+
+**Context:** 
+Since launch preparation began, the Lightsail firewall allowed HTTP (80) and HTTPS (443) from 0.0.0.0/0 and ::/0. Because the origin's static IP is discoverable (historical DNS records, documentation), an attacker could connect to the origin directly and bypass every Cloudflare-layer protection built in ADR-010/ADR-011: WAF rules, brute-force rate limiting, Bot Fight Mode, Block AI Bots, and HSTS enforcement. A September 2026 audit ranked this the project's single largest open vulnerability.
+
+**Options considered:**
+
+- Restrict 80/443 to Cloudflare's published IP ranges in the Lightsail firewall (console/CLI-managed, since
+  aws_lightsail_instance_public_ports does not support Terraform import)
+- Install Apache-level allow rules (mod_remoteip + Require ip) and leave the firewall open
+- Accept the risk until the Phase 2 EC2 migration, where security groups are fully Terraform-managed
+
+**Decision:** 
+
+Restrict the Lightsail firewall to Cloudflare's 15 IPv4 ranges on 80/443, close IPv6 entirely, keep SSH restricted to the admin home IP.
+
+**Reasoning:** 
+
+Network-level blocking is stronger than application-level filtering — traffic that never reaches Apache cannot exploit it, and it protects even if Apache is misconfigured. Cloudflare publishes its ranges at cloudflare.com/ips, changes them rarely, and announces additions before production use. IPv6 was closed rather than filtered because DNS only publishes A records, so Cloudflare never contacts the origin over IPv6 — any IPv6 connection would by definition be a bypass. Applied via aws lightsail put-instance-public-ports with the full rule set in a single atomic call (the command replaces all rules; the rule JSON is kept locally in firewall-ports.json, gitignored because it contains the admin home IP).
+
+**Verified after apply:** 
+
+Site loads through Cloudflare; direct-IP requests time out; SSH from home IP works; Certbot renewal path (HTTP-01 via the Cloudflare proxy) unaffected.
+
+**Trade-offs accepted:**
+
+Lightsail browser-based SSH no longer works (the replacement rule drops the lightsail-connect aliases). Recovery if the home IP rotates: edit the SSH rule in the Lightsail console's firewall editor, which works regardless of firewall state.
+The firewall remains console/CLI-managed, not Terraform-managed, until Phase 2 (provider import limitation documented in the root main.tf).
+Cloudflare range changes require a manual firewall update; symptom of a stale list would be 522 errors for a subset of visitors.
+
+**Lessons learned:**
+
+- Edge protections are only as strong as origin reachability — a hardened WAF in front of an open origin is a locked front door next to an
+  open window
+- Lightsail's put-instance-public-ports replaces the entire rule set atomically: always include SSH in the submitted rules or be locked out
+  PowerShell mangles inline escaped JSON; pass complex CLI payloads via file:// instead
+
 *New decisions will be added to this file as the project evolves.*
 *Format: ADR-XXX — short title, date, status, context, options, decision, reasoning.*
