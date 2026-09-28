@@ -5,6 +5,15 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  backend "s3" {
+    bucket       = "imaginepatch-terraform-state-767398024800"
+    key          = "root/terraform.tfstate"
+    region       = "us-east-1"
+    profile      = "default"
+    encrypt      = true
+    use_lockfile = true
+  }
 }
 
 provider "aws" {
@@ -114,6 +123,62 @@ resource "aws_cloudtrail" "imaginepatch" {
   }
 
   depends_on = [aws_s3_bucket_policy.cloudtrail_logs]
+}
+
+# ── TERRAFORM REMOTE STATE BUCKET ─────────────────────────────────────────────
+resource "aws_s3_bucket" "terraform_state" {
+  bucket = "imaginepatch-terraform-state-767398024800"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+
+  tags = {
+    project     = "imaginepatch"
+    environment = "production"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "terraform_state" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "terraform_state" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "terraform_state" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "terraform_state" {
+  bucket = aws_s3_bucket.terraform_state.id
+
+  rule {
+    id     = "expire-old-state-versions-90-days"
+    status = "Enabled"
+
+    filter {}
+
+    noncurrent_version_expiration {
+      noncurrent_days = 90
+    }
+  }
 }
 
 # NOTE: aws_lightsail_static_ip and aws_lightsail_instance_public_ports

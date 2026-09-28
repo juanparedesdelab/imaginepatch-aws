@@ -5,6 +5,15 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  backend "s3" {
+    bucket       = "imaginepatch-terraform-state-767398024800"
+    key          = "iam/terraform.tfstate"
+    region       = "us-east-1"
+    profile      = "default"
+    encrypt      = true
+    use_lockfile = true
+  }
 }
 
 provider "aws" {
