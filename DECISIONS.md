@@ -540,5 +540,90 @@ Cloudflare range changes require a manual firewall update; symptom of a stale li
 - Lightsail's put-instance-public-ports replaces the entire rule set atomically: always include SSH in the submitted rules or be locked out
   PowerShell mangles inline escaped JSON; pass complex CLI payloads via file:// instead
 
+# ADR-014 draft — copy into DECISIONS.md (matches existing format)
+
+## ADR-014 — Terraform Remote State and Tested Disaster Recovery
+
+**Date:** 2026-10-11
+**Status:** Accepted
+
+**Context:**
+Both Terraform state files (root module and IAM module) existed only on
+the development laptop, making it a single point of failure for the
+project's infrastructure-as-code: losing the machine meant manually
+re-importing some 40 resources across two modules. Separately, the
+daily Lightsail AutoSnapshot (ADR-002, running since February) had
+never been restored — an untested backup is an assumption, not a
+recovery capability. A September 2026 audit flagged both as the
+highest-priority items after the security block closed (B1 and B3).
+
+**Options considered — state:**
+- S3 remote backend with S3-native locking (use_lockfile, Terraform
+  ≥1.10)
+- S3 remote backend with a DynamoDB lock table (the classic pattern)
+- Keep local state with a scheduled encrypted backup
+
+**Options considered — backups:**
+- Perform a timed restore drill to a temporary instance and document
+  the procedure as a DR runbook
+- Continue trusting snapshot status "Success" without a restore test
+
+**Decision:** Migrate both modules to an S3 backend with native
+locking; run a quarterly restore drill, the first of which was executed
+and timed this date.
+
+**Reasoning — remote state:**
+A dedicated bucket (imaginepatch-terraform-state-<account-id>) was
+created in Terraform itself: versioning enabled (every state change is
+recoverable), SSE-S3 encryption, full public-access block,
+prevent_destroy lifecycle guard, and a 90-day expiry on noncurrent
+versions. Each module uses its own state key (root/, iam/) — separate
+keys are mandatory; sharing one corrupts state. S3-native locking
+(use_lockfile = true) was chosen over DynamoDB because it requires no
+additional billable resource and the project is single-operator;
+Terraform v1.14 supports it natively. The backend's own
+profile = "default" pins state access to the scoped automation user
+even during admin-MFA applies, so the ADR-012 MFA workflow is
+unchanged. Migration used terraform init -migrate-state; both modules
+verified "No changes" afterward.
+
+**Reasoning — restore drill:**
+The latest AutoSnapshot was restored to a temporary instance
+(create-instances-from-snapshot --use-latest-restorable-auto-snapshot).
+Verified on the restored copy: Apache/MariaDB/cron active, 1GB swap and
+system cron fixes persisted via disk, every database table OK via
+wp-cli, Let's Encrypt certificate intact, and the storefront serving
+HTTP 200 both locally and externally (hostname pinned to the temporary
+IP with curl --resolve, which satisfies SNI and certificate
+validation). The instance was deleted in the same session.
+
+**Measured results:**
+- RTO: ~9 minutes from restore command to externally verified store
+  (instance "running" at ~5 minutes; "running" is not "recovered")
+- RPO: up to 24 hours (daily snapshot cadence) — acceptable pre-launch;
+  revisit once real order volume exists, noting Stripe and Printful
+  hold independent copies of order data
+- Drill cost: under $0.02
+
+**Trade-offs and findings:**
+- A restored instance receives Lightsail's DEFAULT firewall (22/80/443
+  open to the world), not the source instance's rules — a drill
+  instance carrying production data must be locked to the admin IP
+  immediately; a real replacement instance must receive the production
+  Cloudflare-only rule set (ADR-013)
+- In a real recovery, moving the static IP to the replacement instance
+  makes the cutover invisible to Cloudflare and requires no DNS change;
+  Terraform state is reconciled afterward (recovery first, IaC hygiene
+  second)
+- State bucket versioning plus snapshot drills establish recovery paths
+  for both the infrastructure definition and the workload itself
+
+**Lessons learned:**
+- An untested backup is not a backup; the first drill also produced the
+  DR runbook, which is now the reusable procedure (playbook session 8)
+- Measure RTO to externally verified service, not to instance state
+- Remote state should be the first S3 use case in any account that
+  runs Terraform from a single workstation
+
 *New decisions will be added to this file as the project evolves.*
 *Format: ADR-XXX — short title, date, status, context, options, decision, reasoning.*

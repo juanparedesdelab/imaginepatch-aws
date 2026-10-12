@@ -1,8 +1,7 @@
 # Terraform files
 .terraform/
-.terraform.lock.hcl
-terraform.tfstate
-terraform.tfstate.backup
+*.tfstate
+*.tfstate.*
 *.tfvars
 
 # AWS credentials - NEVER commit these
@@ -25,7 +24,10 @@ node_modules/
 # Environment files
 .env
 .env.local
+
 # SSH keys
 *.pem
 
+# Firewall rule files - contain home IP
 firewall-ports.json
+drill-ports.json
